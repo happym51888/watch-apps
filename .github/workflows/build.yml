@@ -62,6 +62,14 @@ jobs:
       - name: Privacy manifests match what the code calls
         run: python tools/check_privacy_manifests.py
 
+      # A PowerShell `Set-Content` bundle-id rename rewrote Tactus/project.yml
+      # in the ANSI code page, truncating three em-dashes in comments. Nothing
+      # local objected; XcodeGen on the runner refused to parse the file.
+      - name: Source files are UTF-8
+        run: |
+          python tools/test_check_encoding.py
+          python tools/check_encoding.py
+
       # Guards against continue-on-error coming back. See the script's header:
       # it is why run 5 reported 11/11 green with two builds failing.
       - name: CI can still fail

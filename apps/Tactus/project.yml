@@ -1,4 +1,4 @@
-# XcodeGen spec for Tactus â€?a watch-only metronome.
+# XcodeGen spec for Tactus â€” a watch-only metronome.
 #
 #   brew install xcodegen
 #   xcodegen generate
@@ -79,7 +79,7 @@ targets:
         # click, which is separately the sanctioned way to keep runtime.
         # An app may declare only ONE extended-runtime type; `audio` is a plain
         # background mode and may be combined with it.
-        # See README.md â†?"App Review risk" before changing this.
+        # See README.md â†’ "App Review risk" before changing this.
         WKBackgroundModes:
           - mindfulness
           - audio
@@ -92,7 +92,7 @@ targets:
     sources:
       - path: Complication
       # The complication reads the saved tempo, so it needs the settings types and
-      # the store â€?but not the playback code, which is why HapticProfile lives in
+      # the store â€” but not the playback code, which is why HapticProfile lives in
       # the core and the WatchKit mapping does not.
       - path: Sources/TactusCore
       - path: WatchApp/Storage.swift
