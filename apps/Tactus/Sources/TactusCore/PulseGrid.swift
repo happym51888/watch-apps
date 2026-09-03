@@ -28,7 +28,9 @@ public struct Pulse: Sendable, Equatable {
     public let role: PulseRole
 }
 
-public struct TimeSignature: Sendable, Equatable {
+/// `Hashable` because the settings screen drives a `Picker` off these values,
+/// and both `Picker`'s selection and `.tag(_:)` require it.
+public struct TimeSignature: Sendable, Hashable {
     /// Beats in a bar — the numerator. 4 in 4/4, 7 in 7/8.
     public let beatsPerBar: Int
     /// Note value that gets the beat — the denominator. 4 in 4/4, 8 in 7/8.
