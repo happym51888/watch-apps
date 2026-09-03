@@ -32,31 +32,75 @@ DERIVED="$(pwd)/.sim-build/$SCHEME"
 mkdir -p "$OUT_DIR"
 
 echo "==> Picking a watchOS simulator"
-RUNTIME="$(xcrun simctl list runtimes --json \
-    | python3 -c 'import json,sys; rs=[r for r in json.load(sys.stdin)["runtimes"] if r.get("platform")=="watchOS" and r.get("isAvailable")]; print(rs[-1]["identifier"] if rs else "")')"
-DEVICE_TYPE="$(xcrun simctl list devicetypes --json \
-    | python3 -c 'import json,sys; ds=[d for d in json.load(sys.stdin)["devicetypes"] if d.get("productFamily")=="Apple Watch"]; print(ds[-1]["identifier"] if ds else "")')"
 
-if [[ -z "$RUNTIME" || -z "$DEVICE_TYPE" ]]; then
-    echo "No watchOS runtime or Apple Watch device type available on this runner."
-    echo "Available runtimes:"
-    xcrun simctl list runtimes
-    exit 1
+# Use a device the runner already has. Creating one from the *last* listed
+# Apple Watch device type picked an Apple Watch Series 2 (38mm), which
+# watchOS 26 refuses with "Incompatible device" — the device type list is not
+# ordered by recency and includes hardware no current runtime supports.
+# The pre-created devices are by definition runtime-compatible.
+UDID="$(xcrun simctl list devices available --json | python3 -c '
+import json, sys
+
+data = json.load(sys.stdin)["devices"]
+candidates = []
+for runtime, devices in data.items():
+    if "watchOS" not in runtime:
+        continue
+    for device in devices:
+        if device.get("isAvailable"):
+            candidates.append((runtime, device["name"], device["udid"]))
+
+# Prefer the newest runtime, then the largest case, which is the closest thing
+# to a default modern watch.
+candidates.sort(key=lambda c: (c[0], c[1]))
+print(candidates[-1][2] if candidates else "")
+')"
+
+if [[ -n "$UDID" ]]; then
+    CREATED=0
+    echo "    reusing pre-created device $UDID"
+else
+    # Nothing pre-created: build one, pairing the newest runtime with a device
+    # type that runtime actually supports.
+    read -r RUNTIME DEVICE_TYPE <<< "$(python3 -c '
+import json, subprocess
+
+runtimes = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "runtimes", "--json"]))["runtimes"]
+watch = [r for r in runtimes if r.get("platform") == "watchOS" and r.get("isAvailable")]
+if not watch:
+    print(" ")
+    raise SystemExit
+newest = sorted(watch, key=lambda r: r["version"])[-1]
+# supportedDeviceTypes is the runtime own list of what it can run.
+supported = newest.get("supportedDeviceTypes", [])
+supported.sort(key=lambda d: d["name"])
+print(newest["identifier"], supported[-1]["identifier"] if supported else "")
+')"
+
+    if [[ -z "${RUNTIME:-}" || -z "${DEVICE_TYPE:-}" ]]; then
+        echo "No usable watchOS runtime on this runner."
+        xcrun simctl list runtimes
+        exit 1
+    fi
+
+    echo "    runtime: $RUNTIME"
+    echo "    device:  $DEVICE_TYPE"
+    UDID="$(xcrun simctl create "ci-$SCHEME" "$DEVICE_TYPE" "$RUNTIME")"
+    CREATED=1
+    echo "    created  $UDID"
 fi
-
-echo "    runtime: $RUNTIME"
-echo "    device:  $DEVICE_TYPE"
-
-# A dedicated device per scheme, so a wedged simulator from a previous scheme
-# cannot make the next one look broken.
-UDID="$(xcrun simctl create "ci-$SCHEME" "$DEVICE_TYPE" "$RUNTIME")"
-echo "    udid:    $UDID"
 
 cleanup() {
     xcrun simctl shutdown "$UDID" >/dev/null 2>&1 || true
-    xcrun simctl delete "$UDID" >/dev/null 2>&1 || true
+    # Only delete what this script made; deleting a runner's pre-created
+    # device would break the other schemes running in parallel.
+    if [[ "${CREATED:-0}" == "1" ]]; then
+        xcrun simctl delete "$UDID" >/dev/null 2>&1 || true
+    fi
 }
 trap cleanup EXIT
+
+xcrun simctl list devices available | grep -A0 "$UDID" || true
 
 xcrun simctl boot "$UDID"
 xcrun simctl bootstatus "$UDID" -b

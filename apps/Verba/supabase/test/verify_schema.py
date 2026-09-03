@@ -423,12 +423,30 @@ def test_search(conn, alice):
         found = [r[0] for r in cur.fetchall()]
         check(found == ["s-en"], "full-text search does work for English", f"got {found}")
 
+        # Why the above happens, asserted in a way that does not depend on the
+        # server's locale. An earlier version required exactly one token; that
+        # held on a --locale=C cluster and failed on the postgres:16 image,
+        # which splits the sentence at the ideographic comma into two. The
+        # locale-independent property is that Postgres does not segment Chinese
+        # into *words*: it produces a couple of clause-sized tokens for sixteen
+        # characters, and none of them is a word you would search for.
         cur.execute("select transcript_search::text from public.memos where id = 's-cn'")
         vector = cur.fetchone()[0]
+        tokens = [part.split("'")[1] for part in vector.split() if "'" in part]
         check(
-            vector.count("'") == 2,
-            "the Chinese sentence really does become a single token",
-            f"got {vector[:60]}",
+            len(tokens) <= 3,
+            "the Chinese sentence is not segmented into words",
+            f"{len(tokens)} tokens from {len(chinese)} characters: {tokens}",
+        )
+        check(
+            all(len(token) > 3 for token in tokens),
+            "every token is a whole clause, not a word",
+            f"got {tokens}",
+        )
+        check(
+            "开会" not in tokens,
+            "and a searchable word is not among them",
+            f"got {tokens}",
         )
 
     # The generated column must track edits, or search silently returns stale
