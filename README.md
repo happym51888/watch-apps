@@ -30,7 +30,28 @@
 
 ---
 
-## 核心逻辑已验证，Swift 尚未编译
+## 当前状态：四个应用全部编译通过、测试全绿
+
+GitHub Actions 的 `macos-15` runner 上，真实的 `xcodebuild` 和 `swift test`：
+
+| 构建目标 | 结果 | | 测试 | 结果 |
+|---|---|---|---|---|
+| KairosWatch | BUILD SUCCEEDED | | Kairos | 9 tests, 0 failures |
+| Kairos (iOS) | BUILD SUCCEEDED | | Tactus | 31 tests, 0 failures |
+| TactusWatch | BUILD SUCCEEDED | | Awqat | 36 tests, 0 failures |
+| AwqatWatch | BUILD SUCCEEDED | | Verba | 19 tests, 0 failures |
+| VerbaWatch | BUILD SUCCEEDED | | | |
+| Verba (iOS) | BUILD SUCCEEDED | | 合计 | **95 tests, 0 failures** |
+
+六个目标全部 0 error。从第一次推上去到全绿一共八轮，中间修掉的都是**只有编译器才能发现的问题**：模块导入、Swift 6 数据竞争、协议隔离、类型检查超时、缺失的 `Hashable` conformance。清单见
+[`02-verification-status.md`](02-verification-status.md)。
+
+其中有两个值得单独说：
+
+- **CI 曾经在骗人。** `continue-on-error: true` 是第一轮为了一次性看到所有错误加的，但它让任务在 `xcodebuild` 失败时依然报绿。第 5 轮 11 个任务全绿、实际两个构建是失败的，就是它造成的。现在两处都已删除，绿灯才有意义。
+- **测试写错了，代码是对的。** Awqat 有两个儒略日断言失败，查下来是我写测试时把 Meeus 书里的 "1957 October 4.81 → JD 2436116.31" 当成了午夜值。用 Python 独立算过之后确认：实现返回的 2436115.5 才对。
+
+## 核心逻辑另有一层验证（编译之外）
 
 Swift 工具链在这台 Windows 机器上装好了，但无法编译——标准库需要 Windows SDK，而 MSVC 构建工具的安装需要管理员权限（已尝试，失败）。SwiftUI 与 WatchKit 在 Apple 平台之外则根本无法编译。
 
@@ -58,7 +79,7 @@ python apps/Verba/validation/verify_upsert.py       # PASS (36 assertions)
 
 Verba 那三条是这次新加的，思路和前三个一样：录音机唯一不可原谅的 bug 是丢录音，所以队列写成纯状态机，然后拿随机事件流猛砸，**每一个事件之后**都检查"只存在于手表上的音频有没有被删"。分段拼接同理——固定切分会吃掉跨越切口的那个词，转出来的文字读着通顺、每分钟少一个词，是最难发现的一种错。
 
-**这不能替代编译。** Swift 语法错误、类型不匹配、SwiftUI 的问题一个都抓不到。第一次构建时预期会有编译错误要修。
+**这不能替代编译**，两者抓的是不同的东西。Python 验证器管"算得对不对"，编译器管"写得合不合法"——上面那 8 轮修的错，验证器一个都发现不了；而验证器抓到的 Asr 偏差 60 秒，编译器也永远不会报。两层都得有。
 
 ---
 
@@ -71,7 +92,7 @@ Verba 那三条是这次新加的，思路和前三个一样：录音机唯一�
 3. 用 XcodeGen 生成工程，`xcodebuild` 出完整 watchOS 构建
 4. 把编译错误汇总到 Actions 的 Summary 页，并上传完整日志
 
-前两次运行里 Swift 相关的步骤设了 `continue-on-error`，因为这批代码从没见过编译器——**你要的是完整错误清单，不是停在第一个错误上的任务**。全绿之后把这两处删掉。
+前几轮里 Swift 相关的步骤设了 `continue-on-error`，因为这批代码从没见过编译器——**当时要的是完整错误清单，不是停在第一个错误上的任务**。这两处现在已经删掉了：留着它，构建失败也会报绿（第 5 轮就是这样骗过去的），绿灯就不再是证据。
 
 公开仓库的 macOS runner 免费；私有仓库按 10 倍计费 macOS 分钟数，会很快吃掉免费额度，建议先用公开仓库。
 

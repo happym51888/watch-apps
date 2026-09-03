@@ -1,35 +1,36 @@
 Building for debugging...
-[0/7] /Users/runner/work/watch-apps/watch-apps/apps/Verba/.build/arm64-apple-macosx/debug/VerbaCorePackageTests.derived/runner.swift
 [0/7] Write sources
+[0/7] /Users/runner/work/watch-apps/watch-apps/apps/Verba/.build/arm64-apple-macosx/debug/VerbaCorePackageTests.derived/runner.swift
+[2/7] Write sources
 [4/7] Write swift-version--79AA4F9932D1E87A.txt
-[6/12] Emitting module VerbaCore
-[7/12] Compiling VerbaCore Recording.swift
-[8/12] Compiling VerbaCore Transcript.swift
+[6/12] Compiling VerbaCore Recording.swift
+[7/12] Compiling VerbaCore Transcript.swift
+[8/12] Emitting module VerbaCore
 [9/12] Compiling VerbaCore Backoff.swift
 [10/12] Compiling VerbaCore ChunkPlan.swift
 [11/14] Compiling VerbaCore TranscriptStitcher.swift
 [12/14] Compiling VerbaCore TransferQueue.swift
 [13/16] Emitting module VerbaCoreTests
 [14/16] Compiling VerbaCoreTests TransferQueueTests.swift
-[15/18] Compiling VerbaCorePackageTests runner.swift
-[16/18] Emitting module VerbaCorePackageTests
+[15/18] Emitting module VerbaCorePackageTests
+[16/18] Compiling VerbaCorePackageTests runner.swift
 [16/18] Write Objects.LinkFileList
 [17/18] Linking VerbaCorePackageTests
-Build complete! (24.36s)
-Test Suite 'All tests' started at 2026-09-03 15:13:06.799.
-Test Suite 'VerbaCorePackageTests.xctest' started at 2026-09-03 15:13:06.802.
-Test Suite 'BackoffTests' started at 2026-09-03 15:13:06.802.
+Build complete! (20.53s)
+Test Suite 'All tests' started at 2026-09-03 15:41:36.486.
+Test Suite 'VerbaCorePackageTests.xctest' started at 2026-09-03 15:41:36.488.
+Test Suite 'BackoffTests' started at 2026-09-03 15:41:36.488.
 Test Case '-[VerbaCoreTests.BackoffTests testCeilingSaturatesRatherThanOverflowing]' started.
-Test Case '-[VerbaCoreTests.BackoffTests testCeilingSaturatesRatherThanOverflowing]' passed (0.005 seconds).
+Test Case '-[VerbaCoreTests.BackoffTests testCeilingSaturatesRatherThanOverflowing]' passed (0.003 seconds).
 Test Case '-[VerbaCoreTests.BackoffTests testDelayStaysWithinBounds]' started.
 Test Case '-[VerbaCoreTests.BackoffTests testDelayStaysWithinBounds]' passed (0.001 seconds).
-Test Suite 'BackoffTests' passed at 2026-09-03 15:13:06.808.
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.006 (0.006) seconds
-Test Suite 'TranscriptTests' started at 2026-09-03 15:13:06.808.
+Test Suite 'BackoffTests' passed at 2026-09-03 15:41:36.492.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.004 (0.005) seconds
+Test Suite 'TranscriptTests' started at 2026-09-03 15:41:36.492.
 Test Case '-[VerbaCoreTests.TranscriptTests testChunkPlanCoversEverySecond]' started.
-Test Case '-[VerbaCoreTests.TranscriptTests testChunkPlanCoversEverySecond]' passed (0.000 seconds).
+Test Case '-[VerbaCoreTests.TranscriptTests testChunkPlanCoversEverySecond]' passed (0.001 seconds).
 Test Case '-[VerbaCoreTests.TranscriptTests testRepetitiveSpeechIsNotOverCollapsed]' started.
-Test Case '-[VerbaCoreTests.TranscriptTests testRepetitiveSpeechIsNotOverCollapsed]' passed (0.001 seconds).
+Test Case '-[VerbaCoreTests.TranscriptTests testRepetitiveSpeechIsNotOverCollapsed]' passed (0.002 seconds).
 Test Case '-[VerbaCoreTests.TranscriptTests testShortRecordingIsNeverSplit]' started.
 Test Case '-[VerbaCoreTests.TranscriptTests testShortRecordingIsNeverSplit]' passed (0.000 seconds).
 Test Case '-[VerbaCoreTests.TranscriptTests testStitchIgnoresCaseAndPunctuationAtTheSeam]' started.
@@ -42,9 +43,9 @@ Test Case '-[VerbaCoreTests.TranscriptTests testTitleTruncatesOnAWordBoundary]' 
 Test Case '-[VerbaCoreTests.TranscriptTests testTitleTruncatesOnAWordBoundary]' passed (0.000 seconds).
 Test Case '-[VerbaCoreTests.TranscriptTests testUnrecognisedSeamKeepsEverything]' started.
 Test Case '-[VerbaCoreTests.TranscriptTests testUnrecognisedSeamKeepsEverything]' passed (0.000 seconds).
-Test Suite 'TranscriptTests' passed at 2026-09-03 15:13:06.811.
-	 Executed 8 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
-Test Suite 'TransferQueueTests' started at 2026-09-03 15:13:06.811.
+Test Suite 'TranscriptTests' passed at 2026-09-03 15:41:36.497.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'TransferQueueTests' started at 2026-09-03 15:41:36.497.
 Test Case '-[VerbaCoreTests.TransferQueueTests testBacklogDrainsOldestFirstWhateverOrderItLoadedIn]' started.
 Test Case '-[VerbaCoreTests.TransferQueueTests testBacklogDrainsOldestFirstWhateverOrderItLoadedIn]' passed (0.000 seconds).
 Test Case '-[VerbaCoreTests.TransferQueueTests testCrashMidTransferRestartsRatherThanStranding]' started.
@@ -58,17 +59,17 @@ Test Case '-[VerbaCoreTests.TransferQueueTests testLateFailureCannotUndoDelivery
 Test Case '-[VerbaCoreTests.TransferQueueTests testNonRetryableFailureBlocksButKeepsTheFile]' started.
 Test Case '-[VerbaCoreTests.TransferQueueTests testNonRetryableFailureBlocksButKeepsTheFile]' passed (0.000 seconds).
 Test Case '-[VerbaCoreTests.TransferQueueTests testRepeatedCrashesCostNoAttempts]' started.
-Test Case '-[VerbaCoreTests.TransferQueueTests testRepeatedCrashesCostNoAttempts]' passed (0.001 seconds).
+Test Case '-[VerbaCoreTests.TransferQueueTests testRepeatedCrashesCostNoAttempts]' passed (0.000 seconds).
 Test Case '-[VerbaCoreTests.TransferQueueTests testRetryClearsBlockedState]' started.
 Test Case '-[VerbaCoreTests.TransferQueueTests testRetryClearsBlockedState]' passed (0.000 seconds).
 Test Case '-[VerbaCoreTests.TransferQueueTests testStoragePressureIsReportedRatherThanResolvedByDeleting]' started.
 Test Case '-[VerbaCoreTests.TransferQueueTests testStoragePressureIsReportedRatherThanResolvedByDeleting]' passed (0.000 seconds).
-Test Suite 'TransferQueueTests' passed at 2026-09-03 15:13:06.815.
-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
-Test Suite 'VerbaCorePackageTests.xctest' passed at 2026-09-03 15:13:06.815.
-	 Executed 19 tests, with 0 failures (0 unexpected) in 0.012 (0.013) seconds
-Test Suite 'All tests' passed at 2026-09-03 15:13:06.815.
-	 Executed 19 tests, with 0 failures (0 unexpected) in 0.012 (0.016) seconds
+Test Suite 'TransferQueueTests' passed at 2026-09-03 15:41:36.499.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'VerbaCorePackageTests.xctest' passed at 2026-09-03 15:41:36.499.
+	 Executed 19 tests, with 0 failures (0 unexpected) in 0.010 (0.011) seconds
+Test Suite 'All tests' passed at 2026-09-03 15:41:36.499.
+	 Executed 19 tests, with 0 failures (0 unexpected) in 0.010 (0.013) seconds
 ◇ Test run started.
 ↳ Testing Library Version: 124.4
 ↳ Target Platform: arm64e-apple-macos14.0

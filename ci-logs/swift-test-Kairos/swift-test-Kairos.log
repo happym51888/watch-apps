@@ -1,13 +1,12 @@
 Building for debugging...
-[0/7] Write sources
 [0/7] /Users/runner/work/watch-apps/watch-apps/apps/Kairos/.build/arm64-apple-macosx/debug/KairosCorePackageTests.derived/runner.swift
-[2/7] Write sources
+[1/7] Write sources
 [4/7] Write swift-version--79AA4F9932D1E87A.txt
-[6/12] Compiling KairosCore Account.swift
-[7/12] Compiling KairosCore Base32.swift
-[8/13] Emitting module KairosCore
-[9/13] Compiling KairosCore CryptoKitHMAC.swift
-[10/13] Compiling KairosCore OTP.swift
+[6/12] Emitting module KairosCore
+[7/12] Compiling KairosCore Account.swift
+[8/12] Compiling KairosCore Base32.swift
+[9/12] Compiling KairosCore CryptoKitHMAC.swift
+[10/12] Compiling KairosCore OTP.swift
 [11/13] Compiling KairosCore OTPAuthURI.swift
 [12/15] Compiling KairosCoreTests OTPVectorTests.swift
 [13/15] Emitting module KairosCoreTests
@@ -15,12 +14,12 @@ Building for debugging...
 [15/17] Emitting module KairosCorePackageTests
 [15/17] Write Objects.LinkFileList
 [16/17] Linking KairosCorePackageTests
-Build complete! (23.12s)
-Test Suite 'All tests' started at 2026-09-03 15:13:10.022.
-Test Suite 'KairosCorePackageTests.xctest' started at 2026-09-03 15:13:10.023.
-Test Suite 'OTPVectorTests' started at 2026-09-03 15:13:10.023.
+Build complete! (24.97s)
+Test Suite 'All tests' started at 2026-09-03 15:41:45.192.
+Test Suite 'KairosCorePackageTests.xctest' started at 2026-09-03 15:41:45.194.
+Test Suite 'OTPVectorTests' started at 2026-09-03 15:41:45.194.
 Test Case '-[KairosCoreTests.OTPVectorTests testCountdownStaysInsideTheOpenInterval]' started.
-Test Case '-[KairosCoreTests.OTPVectorTests testCountdownStaysInsideTheOpenInterval]' passed (0.005 seconds).
+Test Case '-[KairosCoreTests.OTPVectorTests testCountdownStaysInsideTheOpenInterval]' passed (0.004 seconds).
 Test Case '-[KairosCoreTests.OTPVectorTests testCounterAdvancesExactlyOncePerPeriod]' started.
 Test Case '-[KairosCoreTests.OTPVectorTests testCounterAdvancesExactlyOncePerPeriod]' passed (0.000 seconds).
 Test Case '-[KairosCoreTests.OTPVectorTests testDynamicTruncationMasksTheSignBit]' started.
@@ -28,7 +27,7 @@ Test Case '-[KairosCoreTests.OTPVectorTests testDynamicTruncationMasksTheSignBit
 Test Case '-[KairosCoreTests.OTPVectorTests testDynamicTruncationUsesTheOffsetFromTheFinalNibble]' started.
 Test Case '-[KairosCoreTests.OTPVectorTests testDynamicTruncationUsesTheOffsetFromTheFinalNibble]' passed (0.000 seconds).
 Test Case '-[KairosCoreTests.OTPVectorTests testEveryCodeHasExactlyTheRequestedDigitCount]' started.
-Test Case '-[KairosCoreTests.OTPVectorTests testEveryCodeHasExactlyTheRequestedDigitCount]' passed (0.027 seconds).
+Test Case '-[KairosCoreTests.OTPVectorTests testEveryCodeHasExactlyTheRequestedDigitCount]' passed (0.030 seconds).
 Test Case '-[KairosCoreTests.OTPVectorTests testGuaranteedClockSkewTolerance]' started.
 Test Case '-[KairosCoreTests.OTPVectorTests testGuaranteedClockSkewTolerance]' passed (0.000 seconds).
 Test Case '-[KairosCoreTests.OTPVectorTests testHOTPMatchesRFC4226AppendixD]' started.
@@ -36,13 +35,13 @@ Test Case '-[KairosCoreTests.OTPVectorTests testHOTPMatchesRFC4226AppendixD]' pa
 Test Case '-[KairosCoreTests.OTPVectorTests testLeadingZerosSurvive]' started.
 Test Case '-[KairosCoreTests.OTPVectorTests testLeadingZerosSurvive]' passed (0.000 seconds).
 Test Case '-[KairosCoreTests.OTPVectorTests testTOTPMatchesRFC6238AppendixB]' started.
-Test Case '-[KairosCoreTests.OTPVectorTests testTOTPMatchesRFC6238AppendixB]' passed (0.000 seconds).
-Test Suite 'OTPVectorTests' passed at 2026-09-03 15:13:10.058.
-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.035 (0.035) seconds
-Test Suite 'KairosCorePackageTests.xctest' passed at 2026-09-03 15:13:10.058.
-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.035 (0.035) seconds
-Test Suite 'All tests' passed at 2026-09-03 15:13:10.058.
-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.035 (0.036) seconds
+Test Case '-[KairosCoreTests.OTPVectorTests testTOTPMatchesRFC6238AppendixB]' passed (0.001 seconds).
+Test Suite 'OTPVectorTests' passed at 2026-09-03 15:41:45.231.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.037 (0.037) seconds
+Test Suite 'KairosCorePackageTests.xctest' passed at 2026-09-03 15:41:45.231.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.037 (0.037) seconds
+Test Suite 'All tests' passed at 2026-09-03 15:41:45.231.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.037 (0.039) seconds
 ◇ Test run started.
 ↳ Testing Library Version: 124.4
 ↳ Target Platform: arm64e-apple-macos14.0

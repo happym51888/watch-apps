@@ -81,31 +81,77 @@ asserts that no configuration anywhere schedules two haptics closer than the
 Taptic Engine can render them. That is precisely the failure the shipping watch
 metronomes exhibit in their reviews.
 
-## Residual risk
+## Compile verification (closed)
 
-- **Swift compile errors are possible** in all `Sources/` and `Tests/` files, and
-  in the not-yet-written SwiftUI layer. First build on a Mac will surface them.
-  The logic underneath is verified; the transcription is not.
+This section used to say Swift compile errors were possible and unverified. They
+were, and the gap is now closed on GitHub Actions `macos-15` with Xcode 16.4.
+
+Final state, [run 33774061649](https://github.com/happym51888/watch-apps/actions/runs/33774061649):
+
+| xcodebuild | | swift test | |
+|---|---|---|---|
+| KairosWatch | BUILD SUCCEEDED | Kairos | 9 tests, 0 failures |
+| Kairos (iOS) | BUILD SUCCEEDED | Tactus | 31 tests, 0 failures |
+| TactusWatch | BUILD SUCCEEDED | Awqat | 36 tests, 0 failures |
+| AwqatWatch | BUILD SUCCEEDED | Verba | 19 tests, 0 failures |
+| VerbaWatch | BUILD SUCCEEDED | | |
+| Verba (iOS) | BUILD SUCCEEDED | **total** | **95 tests, 0 failures** |
+
+Eight runs to get there. What the compiler caught that the Python validators
+could not, by category:
+
+| Category | Count | Examples |
+|---|---|---|
+| Module structure | 19 files | `import <App>Core` when XcodeGen compiles sources into the target, so no such module exists |
+| Swift 6 data races | 8 | WatchConnectivity `[String: Any]` payloads, `CLHeading`, `CLLocationManager`, `AVCaptureSession`, `ClickPlayer` crossing isolation |
+| Actor isolation vs. protocols | 4 | `WKExtendedRuntimeSessionDelegate` is nonisolated, so `@MainActor` members cannot satisfy it |
+| API that does not exist | 3 | `SpeechAnalyzer`, `SpeechTranscriber`, `AssetInventory` — written from documentation, absent from the SDK |
+| Type-checker limits | 1 | `SettingsView.body`, five picker sections in one `List` literal |
+| Missing conformance | 1 | `TimeSignature` needs `Hashable` for `Picker`; structs get no automatic synthesis |
+| Language rules | 3 | `switch` expression as a call argument, `%` on `Double`, bare `catch` shadowing a `@State` property |
+| Project config | 2 | Verba declaring the repo root as a SwiftPM package; `group:` keys doubling Tactus source paths |
+
+Two findings are worth keeping in mind beyond this project.
+
+**The CI was reporting success while builds failed.** `continue-on-error: true`
+was set on the build and test steps during bring-up, deliberately, so a single
+run would return every app's errors instead of stopping at the first. Run 5 then
+reported 11/11 jobs green while two builds were in fact failing. A gate that
+cannot fail is not a gate; both flags are removed. The per-app matrix already
+gives the "see all errors at once" benefit without lying about the result.
+
+**Two test failures were the test's fault, not the code's.** Awqat's Julian Day
+assertions failed at 2436115.5 vs. an expected 2436116.5. Meeus example 7.a is
+stated for 1957 October 4**.81** → JD 2436116.31, so midnight is 2436115.5; the
+expectation had conflated the worked example's fractional day with 0h. The
+second expectation, 2461469.5, is 2027-03-05, not the 2026-02-28 it claimed.
+Both were checked against Python's proleptic Gregorian ordinal anchored on the
+Unix epoch before touching anything — the implementation was right, and
+`verify_astronomy.py` reproducing 36 published prayer times could not have
+survived a one-day error in the date conversion.
+
+## Residual risk
 - **Untestable-here by nature:** actual haptic feel, whether `WKExtendedRuntimeSession`
   survives a real hour on real hardware, complication refresh budget in practice,
   battery drain, and App Review's opinion of the session type a metronome declares.
   These need a physical Apple Watch.
 
-## To close the gap
+## Reproducing the build
 
-On a Mac with Xcode 27:
+CI does this on every push (see `.github/workflows/build.yml`). On a Mac:
 
 ```sh
 brew install xcodegen
-cd apps/Awqat && xcodegen generate && xcodebuild -scheme AwqatWatch -destination 'generic/platform=watchOS' build
-cd ../Tactus && xcodegen generate && xcodebuild -scheme TactusWatch -destination 'generic/platform=watchOS' build
+cd apps/Kairos && xcodegen generate && xcodebuild -scheme KairosWatch -destination 'generic/platform=watchOS' build
+cd ../Tactus   && xcodegen generate && xcodebuild -scheme TactusWatch -destination 'generic/platform=watchOS' build
+cd ../Awqat    && xcodegen generate && xcodebuild -scheme AwqatWatch  -destination 'generic/platform=watchOS' build
+cd ../Verba    && xcodegen generate && xcodebuild -scheme VerbaWatch  -destination 'generic/platform=watchOS' build
 ```
 
-And run the Swift test suites, which are the real gate:
+And the Swift test suites:
 
 ```sh
-cd apps/Awqat  && swift test
-cd ../Tactus   && swift test
+for app in Kairos Tactus Awqat Verba; do (cd "apps/$app" && swift test); done
 ```
 
 Both packages are plain SwiftPM libraries with no Apple-framework dependencies,
