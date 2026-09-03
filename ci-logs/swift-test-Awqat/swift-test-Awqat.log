@@ -1,35 +1,35 @@
 Building for debugging...
 [0/7] Write sources
-[0/7] /Users/runner/work/watch-apps/watch-apps/apps/Awqat/.build/arm64-apple-macosx/debug/AwqatCorePackageTests.derived/runner.swift
-[2/7] Write sources
+[1/7] /Users/runner/work/watch-apps/watch-apps/apps/Awqat/.build/arm64-apple-macosx/debug/AwqatCorePackageTests.derived/runner.swift
+[1/7] Write sources
 [4/7] Write swift-version--79AA4F9932D1E87A.txt
-[6/11] Emitting module AwqatCore
-[7/11] Compiling AwqatCore Astronomy.swift
-[8/11] Compiling AwqatCore CalculationMethod.swift
+[6/11] Compiling AwqatCore Astronomy.swift
+[7/11] Compiling AwqatCore CalculationMethod.swift
+[8/11] Emitting module AwqatCore
 [9/11] Compiling AwqatCore PrayerTimes.swift
 [10/12] Compiling AwqatCore Qibla.swift
 [11/15] Compiling AwqatCoreTests PrayerLogicTests.swift
 [12/15] Emitting module AwqatCoreTests
 [13/15] Compiling AwqatCoreTests AstronomyTests.swift
 [14/16] Compiling AwqatCoreTests ReferenceTimetableTests.swift
-[15/18] Emitting module AwqatCorePackageTests
-[16/18] Compiling AwqatCorePackageTests runner.swift
+[15/18] Compiling AwqatCorePackageTests runner.swift
+[16/18] Emitting module AwqatCorePackageTests
 [16/18] Write Objects.LinkFileList
 [17/18] Linking AwqatCorePackageTests
-Build complete! (26.35s)
-Test Suite 'All tests' started at 2026-09-03 15:03:46.020.
-Test Suite 'AwqatCorePackageTests.xctest' started at 2026-09-03 15:03:46.022.
-Test Suite 'AstronomyTests' started at 2026-09-03 15:03:46.022.
+Build complete! (32.88s)
+Test Suite 'All tests' started at 2026-09-03 15:13:18.259.
+Test Suite 'AwqatCorePackageTests.xctest' started at 2026-09-03 15:13:18.260.
+Test Suite 'AstronomyTests' started at 2026-09-03 15:13:18.260.
 Test Case '-[AwqatCoreTests.AstronomyTests testAngleNormalisation]' started.
-Test Case '-[AwqatCoreTests.AstronomyTests testAngleNormalisation]' passed (0.002 seconds).
+Test Case '-[AwqatCoreTests.AstronomyTests testAngleNormalisation]' passed (0.005 seconds).
 Test Case '-[AwqatCoreTests.AstronomyTests testAsrTimeSatisfiesTheShadowDefinition]' started.
-Test Case '-[AwqatCoreTests.AstronomyTests testAsrTimeSatisfiesTheShadowDefinition]' passed (0.001 seconds).
+Test Case '-[AwqatCoreTests.AstronomyTests testAsrTimeSatisfiesTheShadowDefinition]' passed (0.002 seconds).
 Test Case '-[AwqatCoreTests.AstronomyTests testDeclinationAtSolsticesAndEquinoxes]' started.
 Test Case '-[AwqatCoreTests.AstronomyTests testDeclinationAtSolsticesAndEquinoxes]' passed (0.000 seconds).
 Test Case '-[AwqatCoreTests.AstronomyTests testDeclinationStaysInsideObliquity]' started.
-Test Case '-[AwqatCoreTests.AstronomyTests testDeclinationStaysInsideObliquity]' passed (0.000 seconds).
+Test Case '-[AwqatCoreTests.AstronomyTests testDeclinationStaysInsideObliquity]' passed (0.001 seconds).
 Test Case '-[AwqatCoreTests.AstronomyTests testEquationOfTimeExtremesAndZeroCrossings]' started.
-Test Case '-[AwqatCoreTests.AstronomyTests testEquationOfTimeExtremesAndZeroCrossings]' passed (0.000 seconds).
+Test Case '-[AwqatCoreTests.AstronomyTests testEquationOfTimeExtremesAndZeroCrossings]' passed (0.001 seconds).
 Test Case '-[AwqatCoreTests.AstronomyTests testEquinoxDayIsAboutTwelveHoursEverywhere]' started.
 Test Case '-[AwqatCoreTests.AstronomyTests testEquinoxDayIsAboutTwelveHoursEverywhere]' passed (0.000 seconds).
 Test Case '-[AwqatCoreTests.AstronomyTests testHanafiShadowPutsTheSunLower]' started.
@@ -37,9 +37,7 @@ Test Case '-[AwqatCoreTests.AstronomyTests testHanafiShadowPutsTheSunLower]' pas
 Test Case '-[AwqatCoreTests.AstronomyTests testHigherElevationMovesSunriseEarlier]' started.
 Test Case '-[AwqatCoreTests.AstronomyTests testHigherElevationMovesSunriseEarlier]' passed (0.000 seconds).
 Test Case '-[AwqatCoreTests.AstronomyTests testJulianDayMatchesMeeusExamples]' started.
-/Users/runner/work/watch-apps/watch-apps/apps/Awqat/Tests/AwqatCoreTests/AstronomyTests.swift:10: error: -[AwqatCoreTests.AstronomyTests testJulianDayMatchesMeeusExamples] : XCTAssertEqualWithAccuracy failed: ("2436115.5") is not equal to ("2436116.5") +/- ("1e-09")
-/Users/runner/work/watch-apps/watch-apps/apps/Awqat/Tests/AwqatCoreTests/AstronomyTests.swift:16: error: -[AwqatCoreTests.AstronomyTests testJulianDayMatchesMeeusExamples] : XCTAssertEqualWithAccuracy failed: ("2461099.5") is not equal to ("2461469.5") +/- ("1e-09")
-Test Case '-[AwqatCoreTests.AstronomyTests testJulianDayMatchesMeeusExamples]' failed (0.210 seconds).
+Test Case '-[AwqatCoreTests.AstronomyTests testJulianDayMatchesMeeusExamples]' passed (0.000 seconds).
 Test Case '-[AwqatCoreTests.AstronomyTests testJulianDaysAreConsecutive]' started.
 Test Case '-[AwqatCoreTests.AstronomyTests testJulianDaysAreConsecutive]' passed (0.000 seconds).
 Test Case '-[AwqatCoreTests.AstronomyTests testLongerShadowMeansLaterAsr]' started.
@@ -50,9 +48,9 @@ Test Case '-[AwqatCoreTests.AstronomyTests testSunNeverSetsInsideMidnightSun]' s
 Test Case '-[AwqatCoreTests.AstronomyTests testSunNeverSetsInsideMidnightSun]' passed (0.000 seconds).
 Test Case '-[AwqatCoreTests.AstronomyTests testSunriseAndSunsetStraddleSolarNoon]' started.
 Test Case '-[AwqatCoreTests.AstronomyTests testSunriseAndSunsetStraddleSolarNoon]' passed (0.000 seconds).
-Test Suite 'AstronomyTests' failed at 2026-09-03 15:03:46.236.
-	 Executed 14 tests, with 2 failures (0 unexpected) in 0.214 (0.215) seconds
-Test Suite 'PrayerLogicTests' started at 2026-09-03 15:03:46.236.
+Test Suite 'AstronomyTests' passed at 2026-09-03 15:13:18.272.
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.011 (0.012) seconds
+Test Suite 'PrayerLogicTests' started at 2026-09-03 15:13:18.272.
 Test Case '-[AwqatCoreTests.PrayerLogicTests testCurrentIsNilBeforeFajr]' started.
 Test Case '-[AwqatCoreTests.PrayerLogicTests testCurrentIsNilBeforeFajr]' passed (0.000 seconds).
 Test Case '-[AwqatCoreTests.PrayerLogicTests testCurrentTracksTheWindow]' started.
@@ -76,9 +74,9 @@ Test Case '-[AwqatCoreTests.PrayerLogicTests testNextReturnsTheFollowingEntry]' 
 Test Case '-[AwqatCoreTests.PrayerLogicTests testQiblaDueNorthFromDirectlySouthOfMakkah]' started.
 Test Case '-[AwqatCoreTests.PrayerLogicTests testQiblaDueNorthFromDirectlySouthOfMakkah]' passed (0.000 seconds).
 Test Case '-[AwqatCoreTests.PrayerLogicTests testQiblaDueSouthFromDirectlyNorthOfMakkah]' started.
-Test Case '-[AwqatCoreTests.PrayerLogicTests testQiblaDueSouthFromDirectlyNorthOfMakkah]' passed (0.000 seconds).
+Test Case '-[AwqatCoreTests.PrayerLogicTests testQiblaDueSouthFromDirectlyNorthOfMakkah]' passed (0.001 seconds).
 Test Case '-[AwqatCoreTests.PrayerLogicTests testQiblaIsAlwaysAValidBearing]' started.
-Test Case '-[AwqatCoreTests.PrayerLogicTests testQiblaIsAlwaysAValidBearing]' passed (0.000 seconds).
+Test Case '-[AwqatCoreTests.PrayerLogicTests testQiblaIsAlwaysAValidBearing]' passed (0.001 seconds).
 Test Case '-[AwqatCoreTests.PrayerLogicTests testQiblaMatchesPublishedBearings]' started.
 Test Case '-[AwqatCoreTests.PrayerLogicTests testQiblaMatchesPublishedBearings]' passed (0.000 seconds).
 Test Case '-[AwqatCoreTests.PrayerLogicTests testReturnsNilInsidePolarNight]' started.
@@ -90,22 +88,22 @@ Test Case '-[AwqatCoreTests.PrayerLogicTests testSunriseIsNotTreatedAsAPrayer]' 
 Test Case '-[AwqatCoreTests.PrayerLogicTests testTehranDepressesMaghribBelowSunset]' started.
 Test Case '-[AwqatCoreTests.PrayerLogicTests testTehranDepressesMaghribBelowSunset]' passed (0.000 seconds).
 Test Case '-[AwqatCoreTests.PrayerLogicTests testTimesAreStrictlyIncreasing]' started.
-Test Case '-[AwqatCoreTests.PrayerLogicTests testTimesAreStrictlyIncreasing]' passed (0.016 seconds).
+Test Case '-[AwqatCoreTests.PrayerLogicTests testTimesAreStrictlyIncreasing]' passed (0.026 seconds).
 Test Case '-[AwqatCoreTests.PrayerLogicTests testWiderFajrAngleMeansEarlierFajr]' started.
-Test Case '-[AwqatCoreTests.PrayerLogicTests testWiderFajrAngleMeansEarlierFajr]' passed (0.000 seconds).
-Test Suite 'PrayerLogicTests' passed at 2026-09-03 15:03:46.255.
-	 Executed 20 tests, with 0 failures (0 unexpected) in 0.018 (0.019) seconds
-Test Suite 'ReferenceTimetableTests' started at 2026-09-03 15:03:46.255.
+Test Case '-[AwqatCoreTests.PrayerLogicTests testWiderFajrAngleMeansEarlierFajr]' passed (0.001 seconds).
+Test Suite 'PrayerLogicTests' passed at 2026-09-03 15:13:18.304.
+	 Executed 20 tests, with 0 failures (0 unexpected) in 0.031 (0.032) seconds
+Test Suite 'ReferenceTimetableTests' started at 2026-09-03 15:13:18.304.
 Test Case '-[AwqatCoreTests.ReferenceTimetableTests testAgreesWithPublishedTimetables]' started.
-Test Case '-[AwqatCoreTests.ReferenceTimetableTests testAgreesWithPublishedTimetables]' passed (0.001 seconds).
+Test Case '-[AwqatCoreTests.ReferenceTimetableTests testAgreesWithPublishedTimetables]' passed (0.004 seconds).
 Test Case '-[AwqatCoreTests.ReferenceTimetableTests testUmmAlQuraUsesFixedIntervalAfterMaghrib]' started.
 Test Case '-[AwqatCoreTests.ReferenceTimetableTests testUmmAlQuraUsesFixedIntervalAfterMaghrib]' passed (0.000 seconds).
-Test Suite 'ReferenceTimetableTests' passed at 2026-09-03 15:03:46.256.
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
-Test Suite 'AwqatCorePackageTests.xctest' failed at 2026-09-03 15:03:46.256.
-	 Executed 36 tests, with 2 failures (0 unexpected) in 0.234 (0.235) seconds
-Test Suite 'All tests' failed at 2026-09-03 15:03:46.257.
-	 Executed 36 tests, with 2 failures (0 unexpected) in 0.234 (0.236) seconds
+Test Suite 'ReferenceTimetableTests' passed at 2026-09-03 15:13:18.309.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.005 (0.005) seconds
+Test Suite 'AwqatCorePackageTests.xctest' passed at 2026-09-03 15:13:18.309.
+	 Executed 36 tests, with 0 failures (0 unexpected) in 0.046 (0.049) seconds
+Test Suite 'All tests' passed at 2026-09-03 15:13:18.309.
+	 Executed 36 tests, with 0 failures (0 unexpected) in 0.046 (0.051) seconds
 ◇ Test run started.
 ↳ Testing Library Version: 124.4
 ↳ Target Platform: arm64e-apple-macos14.0

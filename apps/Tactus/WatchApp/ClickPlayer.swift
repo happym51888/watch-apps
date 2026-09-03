@@ -17,6 +17,11 @@ import Foundation
 /// scheduling jitter as the haptic. That is fine for practice and wrong for
 /// recording to a click track; pre-scheduling onto `AVAudioTime` is the upgrade
 /// path if anyone ever needs sample accuracy.
+/// Main-actor isolated because `MetronomeEngine` owns it outright and is itself
+/// main-actor isolated: without this, every call from the engine would be
+/// sending a non-Sendable `AVAudioEngine` across isolation. Nothing here blocks
+/// — `activateSession()` suspends on a callback rather than holding the thread.
+@MainActor
 final class ClickPlayer {
     private let engine = AVAudioEngine()
     private let player = AVAudioPlayerNode()

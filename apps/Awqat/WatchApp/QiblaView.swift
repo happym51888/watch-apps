@@ -145,11 +145,16 @@ extension Compass: CLLocationManagerDelegate {
         // Qibla bearing is computed from true north, so a magnetic reading is
         // off by the local declination and is flagged rather than silently used
         // as if it were true.
-        let value = newHeading.trueHeading >= 0 ? newHeading.trueHeading : newHeading.magneticHeading
+        // Everything needed is read off CLHeading here, on the delegate's
+        // thread. CLHeading is not Sendable, so the hop below must carry only
+        // these plain values and never the heading object itself.
+        let isTrueNorth = newHeading.trueHeading >= 0
+        let value = isTrueNorth ? newHeading.trueHeading : newHeading.magneticHeading
         let reported = newHeading.headingAccuracy
+        let accuracy = isTrueNorth ? reported : max(reported, 25)
         Task { @MainActor in
             self.heading = value
-            self.accuracy = newHeading.trueHeading >= 0 ? reported : max(reported, 25)
+            self.accuracy = accuracy
         }
     }
 }

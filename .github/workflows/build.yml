@@ -60,9 +60,11 @@ jobs:
         run: python apps/Verba/validation/verify_upsert.py
 
   # -------------------------------------------------------------------------
-  # The compile verdict. `continue-on-error` is deliberate on the first run:
-  # this Swift has never seen a compiler, so the useful output is the full list
-  # of errors, not a job that stops at the first one. Remove it once green.
+  # The compile verdict. `continue-on-error` was set during bring-up, when this
+  # Swift had never seen a compiler and the useful output was the full list of
+  # errors rather than a job stopping at the first one. It is now removed: with
+  # it in place a suite could report a green job while tests were failing, which
+  # is exactly what happened to Awqat's two Julian Day assertions.
   # -------------------------------------------------------------------------
   swift-tests:
     name: swift test (${{ matrix.app }})
@@ -82,7 +84,6 @@ jobs:
 
       - name: swift test
         working-directory: apps/${{ matrix.app }}
-        continue-on-error: true
         run: |
           set -o pipefail
           swift test --enable-code-coverage 2>&1 | tee swift-test-${{ matrix.app }}.log
@@ -157,9 +158,14 @@ jobs:
         working-directory: apps/${{ matrix.app }}
         run: xcodegen generate
 
+      # No `continue-on-error` here. During bring-up it was set so one run would
+      # surface every app's errors instead of stopping at the first failure, but
+      # it also made the job report success while xcodebuild was failing — a
+      # green tick that meant nothing. The matrix already gives per-scheme
+      # isolation, and the steps below are `if: always()`, so errors and logs
+      # still come back from a failed build.
       - name: Build
         working-directory: apps/${{ matrix.app }}
-        continue-on-error: true
         run: |
           set -o pipefail
           xcodebuild build \
