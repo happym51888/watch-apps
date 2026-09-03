@@ -111,7 +111,7 @@ could not, by category:
 | Language rules | 3 | `switch` expression as a call argument, `%` on `Double`, bare `catch` shadowing a `@State` property |
 | Project config | 2 | Verba declaring the repo root as a SwiftPM package; `group:` keys doubling Tactus source paths |
 
-Two findings are worth keeping in mind beyond this project.
+Four findings are worth keeping in mind beyond this project.
 
 **The CI was reporting success while builds failed.** `continue-on-error: true`
 was set on the build and test steps during bring-up, deliberately, so a single
@@ -129,6 +129,44 @@ Both were checked against Python's proleptic Gregorian ordinal anchored on the
 Unix epoch before touching anything — the implementation was right, and
 `verify_astronomy.py` reproducing 36 published prayer times could not have
 survived a one-day error in the date conversion.
+
+**A build broke on a comment.** Renaming Tactus's bundle identifier with
+PowerShell's `Set-Content` rewrote `project.yml` in the machine's ANSI code
+page, truncating three em-dashes from `e2 80 94` to `e2 80`. Every local signal
+said the change was fine — the file read correctly in an editor, `git add` took
+it, the diff was two plausible lines — and XcodeGen on the runner then refused
+to open the file at all. The functional content was never wrong. This is the
+same shape as everything else on this list: no error where the mistake happened,
+an error a long way away. `tools/check_encoding.py` now asserts every tracked
+text file is UTF-8 without a BOM, and `tools/test_check_encoding.py` reproduces
+both failures and asserts the checker reports them. That self-test paid for
+itself on its first run by catching a bug in the checker: printing a decode
+error crashed with `UnicodeEncodeError` on a GBK console, so the check exited
+non-zero and explained nothing.
+
+**Three of the four apps could not be installed, and six green builds said
+otherwise.** Adding a job that installs each watch app on a simulator and
+photographs it found that Kairos, Awqat and Verba produced bundles with no
+`CFBundleIdentifier`. Those three point at a hand-written `INFOPLIST_FILE`;
+Tactus uses XcodeGen's `info:` block. XcodeGen synthesises the identity keys
+into a plist it generates and leaves a hand-written one exactly as written, and
+Xcode does not add them either. Tactus passed only because it was written
+differently, which is the sole reason the difference was visible.
+
+This is the most expensive kind of defect in the set: `xcodebuild` reported
+success, `swift test` reported success, and the artefact was unusable. Nothing
+short of installing it would have said so. All seven hand-written plists — the
+two iPhone apps and three complications had the same hole — now declare the
+identity keys, and `tools/check_infoplists.py` asserts it statically, because
+the simulator job only ever installs the four watch apps.
+
+The diagnosis cost more than the fix. `simulator_smoke.sh` read the identifier
+with `BUNDLE_ID="$(plutil -extract ...)"`; plutil wrote its complaint to
+stdout, command substitution captured it into the variable, and `set -e` ended
+the run. The log showed the app path, then nothing, then a non-zero exit. The
+script now captures and prints that message, validates the identifier's shape
+rather than merely its emptiness, and carries an `ERR` trap that names the
+failing line and command.
 
 ## Residual risk
 - **Untestable-here by nature:** actual haptic feel, whether `WKExtendedRuntimeSession`

@@ -23,6 +23,19 @@
 
 set -euo pipefail
 
+# `set -e` exits on the first failing command and says nothing about which one.
+# Run 11 died between "app: ..." and the next echo, printing no reason at all,
+# and identifying the line took longer than fixing it would have. A CI script
+# that fails invisibly is only marginally better than no CI script.
+on_error() {
+    local status=$? line=$1
+    echo ""
+    echo "!! ${BASH_SOURCE[0]##*/} failed at line ${line} (exit ${status})"
+    echo "!! command: ${BASH_COMMAND}"
+    echo ""
+} >&2
+trap 'on_error $LINENO' ERR
+
 APP_DIR="${1:?usage: simulator_smoke.sh <app-dir> <scheme>}"
 SCHEME="${2:?usage: simulator_smoke.sh <app-dir> <scheme>}"
 PROJECT_NAME="$(basename "$APP_DIR")"
@@ -130,11 +143,32 @@ if [[ -z "$APP_PATH" ]]; then
 fi
 echo "    app: $APP_PATH"
 
-BUNDLE_ID="$(plutil -extract CFBundleIdentifier raw "$APP_PATH/Info.plist")"
+# Read the identifier out of the built bundle rather than trusting project.yml,
+# so a rename that does not reach the binary is caught here. plutil writes its
+# complaint to stderr and returns non-zero; capture both so a failure explains
+# itself instead of tripping `set -e` in silence.
+if ! BUNDLE_ID="$(plutil -extract CFBundleIdentifier raw -o - "$APP_PATH/Info.plist" 2>&1)"; then
+    echo "Could not read CFBundleIdentifier from $APP_PATH/Info.plist"
+    echo "plutil said: $BUNDLE_ID"
+    echo "--- Info.plist keys ---"
+    plutil -p "$APP_PATH/Info.plist" 2>&1 | head -40 || true
+    exit 1
+fi
+BUNDLE_ID="$(printf '%s' "$BUNDLE_ID" | tr -d '[:space:]')"
+# plutil reports some problems on stdout with a zero exit, which would put its
+# own error text into the variable and hand it to simctl as an identifier.
+if [[ ! "$BUNDLE_ID" =~ ^[A-Za-z0-9.-]+\.[A-Za-z0-9.-]+$ ]]; then
+    echo "CFBundleIdentifier is not a bundle identifier: '$BUNDLE_ID'"
+    echo "--- Info.plist ---"
+    plutil -p "$APP_PATH/Info.plist" 2>&1 | head -40 || true
+    exit 1
+fi
 echo "    bundle id: $BUNDLE_ID"
 
 echo "==> Installing and launching"
+set -x
 xcrun simctl install "$UDID" "$APP_PATH"
+set +x
 
 # --terminate-running-process so a stale copy cannot be mistaken for a
 # successful launch of the build under test.

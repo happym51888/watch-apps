@@ -36,3 +36,9 @@ __pycache__/
 # Kept on disk for reference; carries local paths and is of no use to anyone else.
 _probe/
 *-install.log
+
+# CI logs pulled down for diagnosis, and the throwaway scripts written to read
+# them. Useful while chasing a specific failure, worthless once it is fixed.
+ci-logs/
+screenshots/
+.sim-build/
