@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Awqat</string>
+	<key>CFBundleName</key>
+	<string>Awqat</string>
+	<key>WKApplication</key>
+	<true/>
+	<!-- Watch-only: no WKCompanionAppBundleIdentifier, and WKWatchOnly set.
+	     Everything is computed on the watch, so there is nothing for a phone
+	     app to do. -->
+	<key>WKWatchOnly</key>
+	<true/>
+	<key>WKRunsIndependentlyOfCompanionApp</key>
+	<true/>
+
+	<!-- The Fajr alarm uses an extended runtime session of type .alarm. This
+	     is the only background capability the app declares, and it is the
+	     purpose-built one for waking a sleeping user. -->
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>self-care</string>
+	</array>
+
+	<!-- Stated in the user's terms, not the reviewer's. "Never leaves the
+	     watch" is the literal truth here: there is no network code. -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Awqat needs your location to calculate prayer times and the Qibla direction on this watch. Your location never leaves the watch.</string>
+</dict>
+</plist>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Kairos</string>
+	<key>CFBundleName</key>
+	<string>Kairos</string>
+	<key>WKApplication</key>
+	<true/>
+	<key>WKCompanionAppBundleIdentifier</key>
+	<string>app.kairos</string>
+	<key>WKRunsIndependentlyOfCompanionApp</key>
+	<true/>
+	<!-- No background modes. Codes are computed on demand; there is nothing
+	     to keep alive, and asking for runtime we do not need is a review
+	     question we do not need to answer. -->
+</dict>
+</plist>

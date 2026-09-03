@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Kairos</string>
+	<key>CFBundleName</key>
+	<string>Kairos</string>
+	<!-- Worded for the person reading the permission sheet, not for the
+	     reviewer. It says what the camera is for and what it is not. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Kairos uses the camera only to read two-factor setup QR codes. No photo is taken or stored.</string>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+</dict>
+</plist>

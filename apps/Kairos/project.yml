@@ -1,0 +1,112 @@
+name: Kairos
+
+options:
+  bundleIdPrefix: app.kairos
+  deploymentTarget:
+    watchOS: "11.0"
+    iOS: "18.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # Set your Team ID here, or pick a team in Xcode's Signing pane.
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+targets:
+
+  # ---------------------------------------------------------------------
+  # iPhone app. Its whole job is the camera and the App Store listing.
+  # Kairos is *not* watch-only, so none of the ITSWatchOnlyContainer
+  # wrapping that Tactus and Awqat need applies here.
+  # ---------------------------------------------------------------------
+  Kairos:
+    type: application
+    platform: iOS
+    sources:
+      - path: PhoneApp
+      - path: Sources/KairosCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.kairos
+        INFOPLIST_FILE: PhoneApp/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+    dependencies:
+      - target: KairosWatch
+        embed: true
+
+  # ---------------------------------------------------------------------
+  # Watch app. Generates every code locally; needs nothing from the phone
+  # after enrolment.
+  # ---------------------------------------------------------------------
+  KairosWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: WatchApp
+      - path: Sources/KairosCore
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.kairos.watchkitapp
+        INFOPLIST_FILE: WatchApp/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_ENTITLEMENTS: WatchApp/Kairos.entitlements
+    dependencies:
+      - target: KairosComplication
+        embed: true
+
+  # ---------------------------------------------------------------------
+  # Complication. Deliberately does not read the keychain: it shows a
+  # launcher, never a code, so it needs no access to any secret.
+  # ---------------------------------------------------------------------
+  KairosComplication:
+    type: app-extension
+    platform: watchOS
+    sources:
+      - path: Complication
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.kairos.watchkitapp.complication
+        INFOPLIST_FILE: Complication/Info.plist
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+  # ---------------------------------------------------------------------
+  # Logic tests. Run with `swift test` too, no Xcode required.
+  # ---------------------------------------------------------------------
+  KairosCoreTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/KairosCoreTests
+      - path: Sources/KairosCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.kairos.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  KairosWatch:
+    build:
+      targets:
+        KairosWatch: all
+        KairosComplication: all
+    run:
+      config: Debug
+  Kairos:
+    build:
+      targets:
+        Kairos: all
+    run:
+      config: Debug
+    test:
+      targets:
+        - KairosCoreTests

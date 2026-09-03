@@ -1,0 +1,156 @@
+name: Build
+
+# You have no Mac, so this is the Mac.
+#
+# GitHub's macOS runners come with Xcode preinstalled and are free for public
+# repositories (private repos bill macOS minutes at 10x, so a private repo will
+# consume a free-tier allowance quickly — budget for that or keep the repo
+# public).
+#
+# What this gives you:
+#   * a real compiler verdict on Swift that has never been compiled
+#   * the SwiftPM logic tests, run for real
+#   * the Python validators, run alongside them
+#   * an unsigned archive you can inspect
+#
+# What it does not give you: haptic feel, extended-runtime reliability, battery
+# cost, or Core Location behaviour. Those need a wrist.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Fast gate. Runs first because it needs no Xcode and catches the algorithmic
+  # regressions that matter most.
+  # -------------------------------------------------------------------------
+  validate-logic:
+    name: Logic validators
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Prayer astronomy vs published timetables
+        run: python apps/Awqat/validation/verify_astronomy.py
+
+      - name: Metronome haptic rate limit
+        run: python apps/Tactus/validation/verify_haptic_plan.py
+
+      - name: TOTP vs RFC 4226 / 6238 / 4648
+        run: python apps/Kairos/validation/verify_totp.py
+
+      - name: Recorder delivery queue never loses audio
+        run: python apps/Verba/validation/verify_queue.py
+
+      - name: Transcript chunking and stitching
+        run: python apps/Verba/validation/verify_transcript.py
+
+      - name: Memo upsert never blanks a populated field
+        run: python apps/Verba/validation/verify_upsert.py
+
+  # -------------------------------------------------------------------------
+  # The compile verdict. `continue-on-error` is deliberate on the first run:
+  # this Swift has never seen a compiler, so the useful output is the full list
+  # of errors, not a job that stops at the first one. Remove it once green.
+  # -------------------------------------------------------------------------
+  swift-tests:
+    name: swift test (${{ matrix.app }})
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [Tactus, Awqat, Kairos, Verba]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Show toolchain
+        run: swift --version && xcodebuild -version
+
+      - name: swift test
+        working-directory: apps/${{ matrix.app }}
+        continue-on-error: true
+        run: swift test --enable-code-coverage
+
+  # -------------------------------------------------------------------------
+  # Full watchOS build via XcodeGen. Unsigned, because there is no certificate
+  # in CI; this proves the app targets compile and link, not that they ship.
+  # -------------------------------------------------------------------------
+  watch-build:
+    name: xcodebuild (${{ matrix.scheme }})
+    runs-on: macos-15
+    needs: validate-logic
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: Tactus
+            scheme: TactusWatch
+          - app: Awqat
+            scheme: AwqatWatch
+          - app: Kairos
+            scheme: KairosWatch
+          - app: Verba
+            scheme: VerbaWatch
+    steps:
+      - uses: actions/checkout@v4
+
+      # Verba's iPhone target reads Supabase.plist at runtime and is gitignored.
+      # The build needs the file to exist; the values are irrelevant to whether
+      # it compiles.
+      - name: Stub Supabase config
+        if: matrix.app == 'Verba'
+        run: cp apps/Verba/PhoneApp/Supabase.example.plist apps/Verba/PhoneApp/Supabase.plist
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        working-directory: apps/${{ matrix.app }}
+        run: xcodegen generate
+
+      - name: Build
+        working-directory: apps/${{ matrix.app }}
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project ${{ matrix.app }}.xcodeproj \
+            -scheme ${{ matrix.scheme }} \
+            -destination 'generic/platform=watchOS' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            ENABLE_USER_SCRIPT_SANDBOXING=NO \
+            | tee build-${{ matrix.scheme }}.log
+
+      - name: Collect errors
+        if: always()
+        run: |
+          echo "### ${{ matrix.scheme }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          grep -E "error:|warning:" apps/${{ matrix.app }}/build-${{ matrix.scheme }}.log \
+            | sort -u | head -80 >> $GITHUB_STEP_SUMMARY || echo "none" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-log-${{ matrix.scheme }}
+          path: apps/${{ matrix.app }}/build-${{ matrix.scheme }}.log

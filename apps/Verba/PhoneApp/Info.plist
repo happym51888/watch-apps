@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Verba</string>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Verba turns your recordings into text on this iPhone. Transcription runs on the device, so the audio does not leave your hardware.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Verba records voice memos on this iPhone as well as on your Apple Watch.</string>
+
+	<!-- Transcription of a long recording outlives a foreground session, and a
+	     watch handing over a weekend's backlog needs the app to keep working
+	     after the user puts the phone down. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>processing</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>app.verba.transcribe</string>
+	</array>
+</dict>
+</plist>

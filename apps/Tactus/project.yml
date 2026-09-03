@@ -1,0 +1,106 @@
+# XcodeGen spec for Tactus — a watch-only metronome.
+#
+#   brew install xcodegen
+#   xcodegen generate
+#   open Tactus.xcodeproj
+#
+# Why generated rather than a committed .xcodeproj: a pbxproj is unreviewable and
+# merge-hostile, and this project has to be handed to a Mac that has never seen it.
+# Everything about the build is in this one readable file.
+#
+# Note on `platform: watchOS` below: watchOS app targets must use `platform`, not
+# `supportedDestinations`. XcodeGen will not emit the right build phases for a
+# watchOS app declared via supportedDestinations, and Xcode does not offer watchOS
+# as a multiplatform-app destination at all.
+# https://github.com/yonaskolb/XcodeGen/issues/1463
+
+name: Tactus
+options:
+  bundleIdPrefix: com.example.tactus
+  createIntermediateGroups: true
+  deploymentTarget:
+    watchOS: "11.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # Set this to your team, or set it in Xcode's Signing & Capabilities.
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    GENERATE_INFOPLIST_FILE: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+targets:
+
+  TactusWatch:
+    type: application
+    platform: watchOS
+    sources:
+      # The tested core and the watch layer are compiled into the app directly,
+      # so there is no module boundary and no `import TactusCore`. The same files
+      # are what `swift test` exercises through Package.swift.
+      - path: Sources/TactusCore
+        group: Core
+      - path: WatchApp
+      - path: Resources/Assets.xcassets
+    dependencies:
+      - target: TactusComplication
+        embed: true
+    settings:
+      base:
+        PRODUCT_NAME: Tactus
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.tactus.watchkitapp
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    info:
+      path: WatchApp/Info.plist
+      properties:
+        CFBundleDisplayName: Tactus
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # A single-target watchOS app (Xcode 14+ style) rather than the old
+        # app + WatchKit extension pair.
+        WKApplication: true
+        # Runs with no iPhone app at all. Without this the app is a companion and
+        # will not launch on a watch paired by Family Setup.
+        WKWatchOnly: true
+        # `mindfulness` is the extended-runtime session type: frontmost, one hour,
+        # survives the screen switching off. `audio` covers the optional audible
+        # click, which is separately the sanctioned way to keep runtime.
+        # An app may declare only ONE extended-runtime type; `audio` is a plain
+        # background mode and may be combined with it.
+        # See README.md → "App Review risk" before changing this.
+        WKBackgroundModes:
+          - mindfulness
+          - audio
+        UIRequiredDeviceCapabilities:
+          - watch-companion
+
+  TactusComplication:
+    type: app-extension
+    platform: watchOS
+    sources:
+      - path: Complication
+      # The complication reads the saved tempo, so it needs the settings types and
+      # the store — but not the playback code, which is why HapticProfile lives in
+      # the core and the WatchKit mapping does not.
+      - path: Sources/TactusCore
+        group: Core
+      - path: WatchApp/Storage.swift
+        group: Shared
+      - path: Resources/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_NAME: TactusComplication
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.tactus.watchkitapp.complication
+    info:
+      path: Complication/Info.plist
+      properties:
+        CFBundleDisplayName: Tempo
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension

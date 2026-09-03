@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!--
+	Copy this file to Supabase.plist and fill it in. Supabase.plist is
+	gitignored.
+
+	The anon key is designed to be public and shipping it in a client is
+	expected — but it is only safe because Row Level Security is enforcing
+	ownership. Apply supabase/schema.sql before you point a real key at this,
+	or the anon key becomes a world-readable, world-writable database.
+
+	Never put the service_role key here. It bypasses RLS entirely.
+-->
+<dict>
+	<key>url</key>
+	<string>https://YOUR-PROJECT-REF.supabase.co</string>
+	<key>anonKey</key>
+	<string>YOUR-ANON-KEY</string>
+	<key>bucket</key>
+	<string>memo-audio</string>
+</dict>
+</plist>

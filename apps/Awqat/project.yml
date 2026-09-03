@@ -1,0 +1,90 @@
+name: Awqat
+
+options:
+  bundleIdPrefix: app.awqat
+  deploymentTarget:
+    watchOS: "11.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # Set your Team ID here, or pick a team in Xcode's Signing pane.
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+targets:
+
+  # ---------------------------------------------------------------------
+  # Watch-only. There is no iPhone app and no companion, which is the
+  # point: the whole timetable is arithmetic on coordinates, so nothing
+  # here needs a phone or a network. See the README for how a watch-only
+  # app actually reaches the App Store.
+  # ---------------------------------------------------------------------
+  AwqatWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: WatchApp
+      - path: Shared
+      - path: Sources/AwqatCore
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.awqat.watchkitapp
+        INFOPLIST_FILE: WatchApp/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_ENTITLEMENTS: WatchApp/Awqat.entitlements
+    dependencies:
+      - target: AwqatComplication
+        embed: true
+
+  # ---------------------------------------------------------------------
+  # Complication. Reads the shared snapshot only; it never computes a
+  # timetable and never asks for location.
+  # ---------------------------------------------------------------------
+  AwqatComplication:
+    type: app-extension
+    platform: watchOS
+    sources:
+      - path: Complication
+      - path: Shared
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.awqat.watchkitapp.complication
+        INFOPLIST_FILE: Complication/Info.plist
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_ENTITLEMENTS: Complication/Awqat.entitlements
+
+  # ---------------------------------------------------------------------
+  # Astronomy tests, including the published-timetable regression.
+  # Runs under `swift test` as well, with no Xcode.
+  # ---------------------------------------------------------------------
+  AwqatCoreTests:
+    type: bundle.unit-test
+    platform: watchOS
+    sources:
+      - path: Tests/AwqatCoreTests
+      - path: Sources/AwqatCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.awqat.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  AwqatWatch:
+    build:
+      targets:
+        AwqatWatch: all
+        AwqatComplication: all
+    run:
+      config: Debug
+    test:
+      targets:
+        - AwqatCoreTests

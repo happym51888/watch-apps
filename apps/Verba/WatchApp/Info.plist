@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Verba</string>
+	<key>WKApplication</key>
+	<true/>
+	<key>WKCompanionAppBundleIdentifier</key>
+	<string>app.verba</string>
+
+	<!-- Recording starts only on a tap, in the foreground. watchOS does not
+	     permit any third-party app to begin audio input from the background;
+	     this mode exists so that a recording already running survives the
+	     wrist going down, the screen sleeping, and the app leaving the front. -->
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Verba records what you say. Recording starts only when you tap the button, and stops when you tap it again.</string>
+</dict>
+</plist>

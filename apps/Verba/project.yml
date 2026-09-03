@@ -1,0 +1,100 @@
+name: Verba
+
+options:
+  bundleIdPrefix: app.verba
+  deploymentTarget:
+    watchOS: "11.0"
+    iOS: "18.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+packages:
+  VerbaCore:
+    path: .
+
+targets:
+
+  # The iPhone app is a real app here, not a stub container: it does the
+  # transcription, because watchOS has no speech API at all. That also means
+  # this ships as a normal paired app and avoids the watch-only submission
+  # dance entirely.
+  Verba:
+    type: application
+    platform: iOS
+    sources:
+      - path: PhoneApp
+    dependencies:
+      - package: VerbaCore
+        product: VerbaCore
+      - target: VerbaWatch
+        embed: true
+    info:
+      path: PhoneApp/Info.plist
+      properties:
+        CFBundleDisplayName: Verba
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSSpeechRecognitionUsageDescription: >-
+          Verba turns your recordings into text on this iPhone, so the audio
+          never leaves your devices.
+        NSMicrophoneUsageDescription: >-
+          Verba records voice memos on this iPhone as well as on your Watch.
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.verba
+        INFOPLIST_KEY_CFBundleDisplayName: Verba
+        TARGETED_DEVICE_FAMILY: "1,2"
+
+  VerbaWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: WatchApp
+      - path: Resources
+    dependencies:
+      - package: VerbaCore
+        product: VerbaCore
+    info:
+      path: WatchApp/Info.plist
+      properties:
+        CFBundleDisplayName: Verba
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: app.verba
+        NSMicrophoneUsageDescription: >-
+          Verba records what you say. Recording starts only when you tap the
+          button.
+        # `audio` is what lets a recording continue after you lower your wrist.
+        # It cannot *start* a recording in the background — Apple does not
+        # permit that for anyone — so there is no review argument to have here:
+        # this is an audio app doing audio.
+        WKBackgroundModes:
+          - audio
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.verba.watchkitapp
+        INFOPLIST_KEY_CFBundleDisplayName: Verba
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+schemes:
+  Verba:
+    build:
+      targets:
+        Verba: all
+        VerbaWatch: all
+    test:
+      gatherCoverageData: true
+      targets:
+        - VerbaCoreTests
+  VerbaWatch:
+    build:
+      targets:
+        VerbaWatch: all

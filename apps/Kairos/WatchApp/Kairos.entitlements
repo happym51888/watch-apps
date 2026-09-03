@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Single access group, owned by the watch app. The complication is
+	     deliberately NOT listed: it shows a launcher, never a code, so it has
+	     no business being able to read a secret.
+
+	     Replace $(AppIdentifierPrefix) handling as needed once a real Team ID
+	     is set; Xcode fills the prefix automatically for the first entry. -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)app.kairos.accounts</string>
+	</array>
+</dict>
+</plist>
