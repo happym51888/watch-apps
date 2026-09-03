@@ -74,7 +74,10 @@ extension RuntimeSessionCoordinator: WKExtendedRuntimeSessionDelegate {
         }
     }
 
-    private static func describe(_ reason: WKExtendedRuntimeSessionInvalidationReason) -> String {
+    // `nonisolated` because the delegate callbacks above are nonisolated and
+    // need this to build their message before hopping. It only switches over an
+    // enum, so it touches no actor state.
+    private nonisolated static func describe(_ reason: WKExtendedRuntimeSessionInvalidationReason) -> String {
         switch reason {
         case .none:
             return "Stopped"

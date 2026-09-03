@@ -14,59 +14,84 @@ struct SettingsView: View {
         TimeSignature(beatsPerBar: 12, beatUnit: 8)
     ]
 
+    // Split into one computed property per section. As a single expression the
+    // whole List exceeded the type-checker's budget and failed to build with
+    // "unable to type-check this expression in reasonable time" — SwiftUI's
+    // generic nesting grows fast, and five sections of pickers was past it.
     var body: some View {
         NavigationStack {
             List {
-                Section("Meter") {
-                    Picker("Time signature", selection: meterBinding) {
-                        ForEach(Self.meters, id: \.self) { meter in
-                            Text("\(meter.beatsPerBar)/\(meter.beatUnit)").tag(meter)
-                        }
-                    }
-
-                    Picker("Subdivision", selection: subdivisionBinding) {
-                        Text("Beats").tag(1)
-                        Text("Eighths").tag(2)
-                        Text("Triplets").tag(3)
-                        Text("Sixteenths").tag(4)
-                    }
-                }
-
-                Section("Accents") {
-                    AccentPicker()
-                }
-
-                Section("Haptics") {
-                    Picker("Strength", selection: profileBinding) {
-                        ForEach(HapticProfile.allCases) { profile in
-                            Text(profile.displayName).tag(profile)
-                        }
-                    }
-                    Text(engine.hapticProfile.detail)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-
-                Section {
-                    Toggle("Audible click", isOn: audioBinding)
-                    Text(
-                        "Adds a click on the speaker or your headphones. "
-                        + "Also lets the beat keep running with your wrist down, "
-                        + "and carries subdivisions the wrist is too slow to tap."
-                    )
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                } header: {
-                    Text("Sound")
-                }
-
-                Section("Rate limit") {
-                    Text(limitExplanation)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
+                meterSection
+                accentSection
+                hapticSection
+                soundSection
+                rateLimitSection
             }
             .navigationTitle("Settings")
+        }
+    }
+
+    @ViewBuilder
+    private var meterSection: some View {
+        Section("Meter") {
+            Picker("Time signature", selection: meterBinding) {
+                ForEach(Self.meters, id: \.self) { meter in
+                    Text("\(meter.beatsPerBar)/\(meter.beatUnit)").tag(meter)
+                }
+            }
+
+            Picker("Subdivision", selection: subdivisionBinding) {
+                Text("Beats").tag(1)
+                Text("Eighths").tag(2)
+                Text("Triplets").tag(3)
+                Text("Sixteenths").tag(4)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var accentSection: some View {
+        Section("Accents") {
+            AccentPicker()
+        }
+    }
+
+    @ViewBuilder
+    private var hapticSection: some View {
+        Section("Haptics") {
+            Picker("Strength", selection: profileBinding) {
+                ForEach(HapticProfile.allCases) { profile in
+                    Text(profile.displayName).tag(profile)
+                }
+            }
+            Text(engine.hapticProfile.detail)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private var soundSection: some View {
+        Section {
+            Toggle("Audible click", isOn: audioBinding)
+            Text(
+                "Adds a click on the speaker or your headphones. "
+                + "Also lets the beat keep running with your wrist down, "
+                + "and carries subdivisions the wrist is too slow to tap."
+            )
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+        } header: {
+            Text("Sound")
+        }
+    }
+
+    @ViewBuilder
+    private var rateLimitSection: some View {
+        Section("Rate limit") {
+            Text(limitExplanation)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
         }
     }
 
