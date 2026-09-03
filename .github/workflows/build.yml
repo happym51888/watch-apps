@@ -41,6 +41,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      # The validators are stdlib-only on purpose. The repo checks below read
+      # project.yml, so they need a YAML parser; install it once, up front,
+      # rather than in whichever step happens to run first.
+      - name: Install check dependencies
+        run: pip install --quiet pyyaml
+
       - name: Prayer astronomy vs published timetables
         run: python apps/Awqat/validation/verify_astronomy.py
 
@@ -80,9 +86,7 @@ jobs:
       # Guards against continue-on-error coming back. See the script's header:
       # it is why run 5 reported 11/11 green with two builds failing.
       - name: CI can still fail
-        run: |
-          pip install --quiet pyyaml
-          python tools/check_workflow.py
+        run: python tools/check_workflow.py
 
   # -------------------------------------------------------------------------
   # The database half of Verba, against a real PostgreSQL server.

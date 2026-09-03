@@ -17,12 +17,28 @@ Run:  python tools/check_workflow.py
 from __future__ import annotations
 
 import pathlib
+import re
 import sys
 
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 WORKFLOW = ROOT / ".github" / "workflows" / "build.yml"
+
+SCRIPT = re.compile(r"python3?\s+((?:tools|apps)/[\w./-]+\.py)")
+IMPORT = re.compile(r"^\s*(?:import|from)\s+(\w+)", re.MULTILINE)
+PIP = re.compile(r"pip\s+install\s+(?:--\S+\s+)*(.+)")
+
+# Modules the validators may import that are not in the standard library.
+THIRD_PARTY = {"yaml", "psycopg", "psycopg2", "requests", "PIL"}
+
+# pip name -> module name, where they differ.
+DISTRIBUTIONS = {
+    "pyyaml": {"yaml"},
+    "psycopg[binary]": {"psycopg"},
+    "psycopg2-binary": {"psycopg2"},
+    "pillow": {"PIL"},
+}
 
 failures: list[str] = []
 checks = 0
@@ -39,6 +55,9 @@ def check(condition: bool, label: str, detail: str = "") -> None:
 
 
 def main() -> int:
+    for stream in (sys.stdout, sys.stderr):
+        stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+
     print("=" * 72)
     print("CI workflow")
     print("=" * 72)
@@ -85,6 +104,52 @@ def main() -> int:
                 f"if: {step.get('if')!r}",
             )
 
+    # Every script the workflow names must exist. A rename that misses the
+    # workflow fails four minutes into a run instead of here.
+    for job_name, job in jobs.items():
+        for step in job.get("steps", []) or []:
+            if not isinstance(step, dict):
+                continue
+            for match in SCRIPT.finditer(str(step.get("run", ""))):
+                script = match.group(1)
+                check(
+                    (ROOT / script).exists(),
+                    f"{job_name}: {script} exists",
+                )
+
+    # A step that imports a third-party module must come after the step that
+    # installs it. check_infoplists.py imported yaml one step before the pip
+    # install that had always been buried in a later step, and the job died on
+    # ModuleNotFoundError with every actual check passing.
+    for job_name, job in jobs.items():
+        installed: set[str] = set()
+        for step in job.get("steps", []) or []:
+            if not isinstance(step, dict):
+                continue
+            run = str(step.get("run", ""))
+            for match in SCRIPT.finditer(run):
+                path = ROOT / match.group(1)
+                if not path.exists():
+                    continue
+                needed = THIRD_PARTY & set(
+                    IMPORT.findall(path.read_text(encoding="utf-8"))
+                )
+                unmet = sorted(needed - installed)
+                check(
+                    not unmet,
+                    f"{job_name}: {match.group(1)} has its imports installed",
+                    f"needs {', '.join(unmet)} installed by an earlier step",
+                )
+            for spec in PIP.findall(run):
+                for token in spec.split():
+                    # e.g. "psycopg[binary]" -> psycopg; pyyaml -> yaml
+                    name = token.strip("\"'").lower().split("[")[0]
+                    installed.add(name)
+                    installed.update(DISTRIBUTIONS.get(name, set()))
+                    installed.update(
+                        DISTRIBUTIONS.get(token.strip("\"'").lower(), set())
+                    )
+
     expected = {
         "validate-logic",
         "postgres-schema",
@@ -105,7 +170,7 @@ def main() -> int:
             count = len(matrix["app"])
         else:
             count = 1
-        needs = job.get("needs", "—")
+        needs = job.get("needs", "-")
         print(f"    {job_name:18} {job['runs-on']:12} x{count:<3} needs={needs}")
 
     print()
