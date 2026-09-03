@@ -15,8 +15,15 @@
 #   2. it launches and stays alive
 #   3. what it draws is not a blank screen
 #
-# The screenshots are a by-product, and a useful one: App Store Connect wants
-# watch screenshots and there is no Mac here to take them by hand.
+# The third assertion is weaker than it sounds, and worth stating plainly: a
+# non-blank screen is not a correct screen. Kairos passed this check while
+# displaying "Keychain unavailable", because an error screen has plenty of
+# distinct colours. The screenshots are uploaded on every run precisely so a
+# human can look at them; treat a green job as "it did not crash", not as
+# "it works".
+#
+# They are also useful in their own right: App Store Connect wants watch
+# screenshots and there is no Mac here to take them by hand.
 #
 # Usage: tools/simulator_smoke.sh <app-dir> <scheme>
 #   e.g. tools/simulator_smoke.sh apps/Kairos KairosWatch
@@ -118,6 +125,13 @@ xcrun simctl list devices available | grep -A0 "$UDID" || true
 xcrun simctl boot "$UDID"
 xcrun simctl bootstatus "$UDID" -b
 
+# Ad-hoc signed (CODE_SIGN_IDENTITY=-) rather than unsigned. An unsigned build
+# carries no entitlements, and Kairos then fails every keychain call with
+# errSecMissingEntitlement (-34018): it launched, rendered, passed this check,
+# and displayed "Keychain unavailable" — the app's whole purpose broken, with
+# the job green. Ad-hoc signing on a simulator applies the entitlements file
+# without needing a team or a provisioning profile, so the vault is exercised
+# for real.
 echo "==> Building $SCHEME for the simulator"
 (
     cd "$APP_DIR"
@@ -128,8 +142,12 @@ echo "==> Building $SCHEME for the simulator"
         -destination "id=$UDID" \
         -configuration Debug \
         -derivedDataPath "$DERIVED" \
-        CODE_SIGNING_ALLOWED=NO \
+        CODE_SIGNING_ALLOWED=YES \
         CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGN_IDENTITY=- \
+        CODE_SIGN_STYLE=Manual \
+        DEVELOPMENT_TEAM="" \
+        PROVISIONING_PROFILE_SPECIFIER="" \
         ENABLE_USER_SCRIPT_SANDBOXING=NO \
         > "$OUT_DIR/build-sim-$SCHEME.log" 2>&1 \
         || { echo "Simulator build failed; last 40 lines:"; tail -40 "$OUT_DIR/build-sim-$SCHEME.log"; exit 1; }
