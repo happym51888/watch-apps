@@ -75,6 +75,15 @@ jobs:
       - name: Bundles declare the keys they need to install
         run: python tools/check_infoplists.py
 
+      # The repo is public, which is what makes the macOS runners free, and
+      # also means every commit is fetchable forever. Verba's setup asks the
+      # reader to paste a Supabase URL and key into files that are gitignored
+      # — but a gitignore only guards paths someone remembered to list.
+      - name: No credentials in tracked files
+        run: |
+          python tools/test_check_secrets.py
+          python tools/check_secrets.py
+
       # A PowerShell `Set-Content` bundle-id rename rewrote Tactus/project.yml
       # in the ANSI code page, truncating three em-dashes in comments. Nothing
       # local objected; XcodeGen on the runner refused to parse the file.
