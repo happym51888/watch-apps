@@ -42,8 +42,12 @@ targets:
       # The tested core and the watch layer are compiled into the app directly,
       # so there is no module boundary and no `import TactusCore`. The same files
       # are what `swift test` exercises through Package.swift.
+      #
+      # No `group:` key here. It only reorganises the Xcode navigator, and
+      # XcodeGen applies it as a path prefix as well, which resolved these
+      # files to Sources/Sources/TactusCore/... and failed the build with
+      # "Build input files cannot be found".
       - path: Sources/TactusCore
-        group: Core
       - path: WatchApp
       - path: Resources/Assets.xcassets
     dependencies:
@@ -88,9 +92,7 @@ targets:
       # the store — but not the playback code, which is why HapticProfile lives in
       # the core and the WatchKit mapping does not.
       - path: Sources/TactusCore
-        group: Core
       - path: WatchApp/Storage.swift
-        group: Shared
       - path: Resources/Assets.xcassets
     settings:
       base:

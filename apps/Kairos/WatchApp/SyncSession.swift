@@ -29,8 +29,14 @@ final class SyncSession: NSObject {
         session.activate()
     }
 
-    fileprivate func ingest(_ payload: [String: Any]) {
-        guard let uris = payload["accounts"] as? [String] else { return }
+    /// Takes `[String]` rather than the raw `[String: Any]` payload.
+    ///
+    /// `[String: Any]` is not `Sendable`, so handing one from a `nonisolated`
+    /// WatchConnectivity callback into a `@MainActor` task is a data race that
+    /// Swift 6 rejects outright. The delegate methods below pull the one value
+    /// they need out of the dictionary while still on the calling thread, and
+    /// send that across instead.
+    fileprivate func ingest(_ uris: [String]) {
         guard let model else { return }
 
         for uri in uris {
@@ -64,7 +70,8 @@ extension SyncSession: WCSessionDelegate {
         _ session: WCSession,
         didReceiveUserInfo userInfo: [String: Any] = [:]
     ) {
-        Task { @MainActor in self.ingest(userInfo) }
+        let uris = userInfo["accounts"] as? [String] ?? []
+        Task { @MainActor in self.ingest(uris) }
     }
 
     /// Also accept a live message, for the case where the user is watching the
@@ -74,9 +81,14 @@ extension SyncSession: WCSessionDelegate {
         didReceiveMessage message: [String: Any],
         replyHandler: @escaping ([String: Any]) -> Void
     ) {
-        Task { @MainActor in
-            self.ingest(message)
-            replyHandler(["ok": true])
-        }
+        let uris = message["accounts"] as? [String] ?? []
+
+        // Reply here rather than inside the task. The handler is not `Sendable`,
+        // so it cannot cross into the actor — and WatchConnectivity wants a
+        // prompt reply anyway: it is acknowledging receipt, not the result of
+        // storing anything.
+        replyHandler(["ok": true])
+
+        Task { @MainActor in self.ingest(uris) }
     }
 }

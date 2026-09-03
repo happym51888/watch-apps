@@ -83,7 +83,29 @@ jobs:
       - name: swift test
         working-directory: apps/${{ matrix.app }}
         continue-on-error: true
-        run: swift test --enable-code-coverage
+        run: |
+          set -o pipefail
+          swift test --enable-code-coverage 2>&1 | tee swift-test-${{ matrix.app }}.log
+
+      # Same treatment as the xcodebuild job. Reading these through
+      # `gh run view --log` is unreliable on some networks; an artifact always
+      # downloads.
+      - name: Collect failures
+        if: always()
+        working-directory: apps/${{ matrix.app }}
+        run: |
+          echo "### swift test — ${{ matrix.app }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          grep -E "error:|XCTAssert.*failed|Test Case.*failed|Executed [0-9]+ test" \
+            swift-test-${{ matrix.app }}.log \
+            | sort -u | head -60 >> $GITHUB_STEP_SUMMARY || echo "none" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: swift-test-${{ matrix.app }}
+          path: apps/${{ matrix.app }}/swift-test-${{ matrix.app }}.log
 
   # -------------------------------------------------------------------------
   # Full watchOS build via XcodeGen. Unsigned, because there is no certificate
@@ -105,6 +127,16 @@ jobs:
             scheme: KairosWatch
           - app: Verba
             scheme: VerbaWatch
+          # The iPhone targets need building too. The first run only built the
+          # watch schemes, which meant Verba's whole transcription and Supabase
+          # layer — and Kairos's phone enrolment screen — were never compiled,
+          # and a Swift 6 Sendable error sat there looking like a pass.
+          - app: Kairos
+            scheme: Kairos
+            destination: generic/platform=iOS
+          - app: Verba
+            scheme: Verba
+            destination: generic/platform=iOS
     steps:
       - uses: actions/checkout@v4
 
@@ -133,7 +165,7 @@ jobs:
           xcodebuild build \
             -project ${{ matrix.app }}.xcodeproj \
             -scheme ${{ matrix.scheme }} \
-            -destination 'generic/platform=watchOS' \
+            -destination '${{ matrix.destination || 'generic/platform=watchOS' }}' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \

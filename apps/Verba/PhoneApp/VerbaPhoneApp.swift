@@ -78,37 +78,39 @@ final class Inbox: NSObject {
 
     // MARK: - Pipeline
 
-    fileprivate func ingest(fileAt url: URL, recordingID: RecordingID, metadata: [String: Any]) {
-        // WatchConnectivity hands over a file in a temporary inbox that it
-        // reclaims as soon as this callback returns. Copying it out first is
-        // not optional — reading it later gets nothing.
-        let destination = InboxFiles.url(for: recordingID)
-        try? FileManager.default.removeItem(at: destination)
-        do {
-            try FileManager.default.copyItem(at: url, to: destination)
-        } catch {
-            append(failure: "Couldn't save the incoming recording. \(error.localizedDescription)",
-                   id: recordingID)
-            return
-        }
+    /// Everything the phone needs from an incoming transfer, in `Sendable` form.
+    ///
+    /// `WCSessionFile` and its `[String: Any]` metadata are not `Sendable`, so
+    /// they cannot be handed from the `nonisolated` delegate callback into a
+    /// `@MainActor` task — Swift 6 rejects it as a data race. The delegate
+    /// flattens what it needs into this while still on the calling thread.
+    struct IncomingTransfer: Sendable {
+        let id: RecordingID
+        let fileURL: URL
+        let startedAt: Date
+        let duration: TimeInterval
+    }
+
+    fileprivate func ingest(_ incoming: IncomingTransfer) {
+        let destination = InboxFiles.url(for: incoming.id)
 
         let recording = Recording(
-            id: recordingID,
-            startedAt: metadata["startedAt"] as? Date ?? Date(),
-            duration: metadata["duration"] as? TimeInterval ?? 0,
+            id: incoming.id,
+            startedAt: incoming.startedAt,
+            duration: incoming.duration,
             byteCount: InboxFiles.byteCount(at: destination),
             state: .delivered
         )
 
         upsert(Entry(
-            id: recordingID,
+            id: incoming.id,
             recording: recording,
             transcript: nil,
             localAudio: destination,
             stage: .received
         ))
 
-        Task { await process(recordingID) }
+        Task { await process(incoming.id) }
     }
 
     private func process(_ id: RecordingID) async {
@@ -209,10 +211,33 @@ extension Inbox: WCSessionDelegate {
     nonisolated func session(_ session: WCSession, didReceive file: WCSessionFile) {
         let metadata = file.metadata ?? [:]
         guard let raw = metadata["recordingID"] as? String else { return }
-        let url = file.fileURL
-        Task { @MainActor in
-            self.ingest(fileAt: url, recordingID: RecordingID(raw: raw), metadata: metadata)
+        let id = RecordingID(raw: raw)
+
+        // The copy happens here, synchronously, and not in the task that
+        // follows. WatchConnectivity reclaims its temporary inbox as soon as
+        // this method returns, so a copy deferred onto the actor races the
+        // system deleting the file — and loses, intermittently, which is the
+        // worst way to lose a recording.
+        let destination = InboxFiles.url(for: id)
+        try? FileManager.default.removeItem(at: destination)
+        do {
+            try FileManager.default.copyItem(at: file.fileURL, to: destination)
+        } catch {
+            let message = error.localizedDescription
+            Task { @MainActor in
+                self.append(failure: "Couldn't save the incoming recording. \(message)", id: id)
+            }
+            return
         }
+
+        let incoming = IncomingTransfer(
+            id: id,
+            fileURL: destination,
+            startedAt: metadata["startedAt"] as? Date ?? Date(),
+            duration: metadata["duration"] as? TimeInterval ?? 0
+        )
+
+        Task { @MainActor in self.ingest(incoming) }
     }
 }
 

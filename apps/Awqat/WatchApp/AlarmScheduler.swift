@@ -177,7 +177,9 @@ final class AlarmScheduler {
         return nil
     }
 
-    enum AlarmFailure: Equatable {
+    // `Error` conformance is required, not decorative: this is the failure type
+    // of a `Result`, and `Result` constrains its Failure to `Error`.
+    enum AlarmFailure: Error, Equatable {
         case disabled
         case noFajrToday
         case inThePast
