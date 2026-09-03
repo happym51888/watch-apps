@@ -60,6 +60,51 @@ jobs:
         run: python apps/Verba/validation/verify_upsert.py
 
   # -------------------------------------------------------------------------
+  # The database half of Verba, against a real PostgreSQL server.
+  #
+  # verify_upsert.py above models the upsert in SQLite, which checks the
+  # coalesce logic but nothing about Postgres. The riskiest code in the schema
+  # is Postgres-specific and fails silently: a wrong Row Level Security policy
+  # does not raise, it returns other people's recordings. Same shape of problem
+  # as the haptic rate limit or the Asr calculation — wrong answers, no error.
+  #
+  # This applies the unmodified schema.sql on top of a shim providing what
+  # Supabase would (auth.uid(), storage.foldername(), the client roles) and
+  # then impersonates real users to check the policies actually bite.
+  # -------------------------------------------------------------------------
+  postgres-schema:
+    name: Verba schema on real Postgres
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Same major version Supabase runs. The official image carries the
+        # contrib modules, so pg_trgm and pgcrypto are available.
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install driver
+        run: pip install --quiet "psycopg[binary]"
+
+      - name: Verify schema, RLS, upsert and search
+        run: |
+          python apps/Verba/supabase/test/verify_schema.py \
+            --dsn "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+
+  # -------------------------------------------------------------------------
   # The compile verdict. `continue-on-error` was set during bring-up, when this
   # Swift had never seen a compiler and the useful output was the full list of
   # errors rather than a job stopping at the first one. It is now removed: with

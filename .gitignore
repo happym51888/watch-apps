@@ -27,6 +27,11 @@ Thumbs.db
 __pycache__/
 *.pyc
 
+# Portable PostgreSQL used to run apps/Verba/supabase/test against a real
+# server on a machine with no Docker and no admin rights. 323 MB of binaries
+# plus a data directory — fetched on demand, see that directory's README.
+.tools/
+
 # Local scaffolding from the (failed) attempt to compile Swift on Windows.
 # Kept on disk for reference; carries local paths and is of no use to anyone else.
 _probe/
