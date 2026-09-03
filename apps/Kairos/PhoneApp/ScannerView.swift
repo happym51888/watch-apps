@@ -37,7 +37,13 @@ struct ScannerView: UIViewControllerRepresentable {
         private let onResult: (Result<String, ScanError>) -> Void
         /// A QR code in frame fires this delegate many times a second. Without
         /// a latch the user gets a stack of identical confirmation sheets.
-        private var hasDelivered = false
+        ///
+        /// Stored as the time of the last delivery rather than a boolean plus a
+        /// timer: the delegate queue is `.main` (see `ScannerViewController`), so
+        /// this is only ever touched on one thread, and re-arming becomes a
+        /// comparison instead of a scheduled task that could outlive the screen.
+        private var lastDeliveryAt: CFAbsoluteTime = 0
+        private static let rearmInterval: CFAbsoluteTime = 2
 
         init(onResult: @escaping (Result<String, ScanError>) -> Void) {
             self.onResult = onResult
@@ -50,24 +56,14 @@ struct ScannerView: UIViewControllerRepresentable {
             didOutput metadataObjects: [AVMetadataObject],
             from connection: AVCaptureConnection
         ) {
-            guard !hasDelivered else { return }
+            let now = CFAbsoluteTimeGetCurrent()
+            guard now - lastDeliveryAt > Self.rearmInterval else { return }
             guard let object = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
                   let value = object.stringValue
             else { return }
 
-            hasDelivered = true
+            lastDeliveryAt = now
             onResult(.success(value))
-
-            // Re-arm after a beat so a second account can be scanned without
-            // leaving the screen.
-            //
-            // A `Task` rather than `DispatchQueue.asyncAfter`: that takes a
-            // `@Sendable` closure, and this one captures the coordinator, which
-            // is not Sendable. Staying on the main actor sidesteps it entirely.
-            Task { @MainActor [weak self] in
-                try? await Task.sleep(for: .seconds(2))
-                self?.hasDelivered = false
-            }
         }
     }
 }

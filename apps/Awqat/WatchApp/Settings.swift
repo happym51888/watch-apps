@@ -138,12 +138,14 @@ extension HighLatitudeRule: Codable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode(
-            switch self {
-            case .middleOfTheNight: "middle"
-            case .seventhOfTheNight: "seventh"
-            case .twilightAngle: "twilight"
-            }
-        )
+        // Bound to a local first: a `switch` expression is only allowed as the
+        // source of an assignment, a return, or a throw — not inline as a call
+        // argument.
+        let token = switch self {
+        case .middleOfTheNight: "middle"
+        case .seventhOfTheNight: "seventh"
+        case .twilightAngle: "twilight"
+        }
+        try container.encode(token)
     }
 }

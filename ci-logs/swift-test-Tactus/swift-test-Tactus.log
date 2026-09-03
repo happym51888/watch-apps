@@ -1,0 +1,99 @@
+Building for debugging...
+[0/7] /Users/runner/work/watch-apps/watch-apps/apps/Tactus/.build/arm64-apple-macosx/debug/TactusCorePackageTests.derived/runner.swift
+[1/7] Write sources
+[4/7] Write swift-version--79AA4F9932D1E87A.txt
+[6/11] Emitting module TactusCore
+[7/11] Compiling TactusCore PulseGrid.swift
+[8/11] Compiling TactusCore HapticPlan.swift
+[9/11] Compiling TactusCore HapticProfile.swift
+[10/12] Compiling TactusCore TapTempo.swift
+[11/15] Compiling TactusCoreTests PulseGridTests.swift
+[12/15] Emitting module TactusCoreTests
+[13/15] Compiling TactusCoreTests HapticPlanTests.swift
+[14/16] Compiling TactusCoreTests TapTempoTests.swift
+[15/18] Compiling TactusCorePackageTests runner.swift
+[16/18] Emitting module TactusCorePackageTests
+[16/18] Write Objects.LinkFileList
+[17/18] Linking TactusCorePackageTests
+Build complete! (19.24s)
+Test Suite 'All tests' started at 2026-09-03 15:03:33.996.
+Test Suite 'TactusCorePackageTests.xctest' started at 2026-09-03 15:03:33.997.
+Test Suite 'HapticPlanTests' started at 2026-09-03 15:03:33.997.
+Test Case '-[TactusCoreTests.HapticPlanTests testAccentGapUsesTheClosestPairIncludingWrapAround]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testAccentGapUsesTheClosestPairIncludingWrapAround]' passed (0.002 seconds).
+Test Case '-[TactusCoreTests.HapticPlanTests testClaimedGapMatchesSimulatedFiring]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testClaimedGapMatchesSimulatedFiring]' passed (0.001 seconds).
+Test Case '-[TactusCoreTests.HapticPlanTests testComfortableTempoKeepsEveryPulse]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testComfortableTempoKeepsEveryPulse]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.HapticPlanTests testDownbeatAlwaysFires]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testDownbeatAlwaysFires]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.HapticPlanTests testFastTempoFallsBackToAccents]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testFastTempoFallsBackToAccents]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.HapticPlanTests testNoPlanEverViolatesTheRateLimit]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testNoPlanEverViolatesTheRateLimit]' passed (0.011 seconds).
+Test Case '-[TactusCoreTests.HapticPlanTests testOneBeatBarAtMaxTempoSkipsBars]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testOneBeatBarAtMaxTempoSkipsBars]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.HapticPlanTests testStrengthMapping]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testStrengthMapping]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.HapticPlanTests testStricterLimitThinsMoreAggressively]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testStricterLimitThinsMoreAggressively]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.HapticPlanTests testSubdivisionsAreDroppedBeforeBeats]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testSubdivisionsAreDroppedBeforeBeats]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.HapticPlanTests testVeryFastTempoWithNoAccentsFallsBackToDownbeat]' started.
+Test Case '-[TactusCoreTests.HapticPlanTests testVeryFastTempoWithNoAccentsFallsBackToDownbeat]' passed (0.000 seconds).
+Test Suite 'HapticPlanTests' passed at 2026-09-03 15:03:34.012.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.015 (0.015) seconds
+Test Suite 'PulseGridTests' started at 2026-09-03 15:03:34.012.
+Test Case '-[TactusCoreTests.PulseGridTests testAccentOutsideBarIsIgnoredRatherThanCrashing]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testAccentOutsideBarIsIgnoredRatherThanCrashing]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testBeatIntervalMatchesTempo]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testBeatIntervalMatchesTempo]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testBpmIsClampedToSupportedRange]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testBpmIsClampedToSupportedRange]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testNextIndexAfterALongStall]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testNextIndexAfterALongStall]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testNextIndexLandsOnBoundaryExactly]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testNextIndexLandsOnBoundaryExactly]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testNextIndexRoundsUpMidPulse]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testNextIndexRoundsUpMidPulse]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testNoDriftOverAnHour]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testNoDriftOverAnHour]' passed (0.001 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testOddMeterBarBoundaries]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testOddMeterBarBoundaries]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testPulsesCoveringAWindow]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testPulsesCoveringAWindow]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testRolesAcrossABarInFourFour]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testRolesAcrossABarInFourFour]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testSubdivisionPulsesAreNeverAccented]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testSubdivisionPulsesAreNeverAccented]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.PulseGridTests testSubdivisionSplitsTheBeat]' started.
+Test Case '-[TactusCoreTests.PulseGridTests testSubdivisionSplitsTheBeat]' passed (0.000 seconds).
+Test Suite 'PulseGridTests' passed at 2026-09-03 15:03:34.014.
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'TapTempoTests' started at 2026-09-03 15:03:34.014.
+Test Case '-[TactusCoreTests.TapTempoTests testEstimateIsClampedToTheSupportedRange]' started.
+Test Case '-[TactusCoreTests.TapTempoTests testEstimateIsClampedToTheSupportedRange]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.TapTempoTests testLongPauseStartsAFreshMeasurement]' started.
+Test Case '-[TactusCoreTests.TapTempoTests testLongPauseStartsAFreshMeasurement]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.TapTempoTests testOneBadTapDoesNotWreckTheEstimate]' started.
+Test Case '-[TactusCoreTests.TapTempoTests testOneBadTapDoesNotWreckTheEstimate]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.TapTempoTests testResetClearsState]' started.
+Test Case '-[TactusCoreTests.TapTempoTests testResetClearsState]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.TapTempoTests testSingleTapGivesNoEstimate]' started.
+Test Case '-[TactusCoreTests.TapTempoTests testSingleTapGivesNoEstimate]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.TapTempoTests testSteadyTappingConverges]' started.
+Test Case '-[TactusCoreTests.TapTempoTests testSteadyTappingConverges]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.TapTempoTests testTwoTapsHalfASecondApartReadAs120]' started.
+Test Case '-[TactusCoreTests.TapTempoTests testTwoTapsHalfASecondApartReadAs120]' passed (0.000 seconds).
+Test Case '-[TactusCoreTests.TapTempoTests testWindowDropsOldestTaps]' started.
+Test Case '-[TactusCoreTests.TapTempoTests testWindowDropsOldestTaps]' passed (0.000 seconds).
+Test Suite 'TapTempoTests' passed at 2026-09-03 15:03:34.015.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'TactusCorePackageTests.xctest' passed at 2026-09-03 15:03:34.015.
+	 Executed 31 tests, with 0 failures (0 unexpected) in 0.018 (0.018) seconds
+Test Suite 'All tests' passed at 2026-09-03 15:03:34.015.
+	 Executed 31 tests, with 0 failures (0 unexpected) in 0.018 (0.019) seconds
+◇ Test run started.
+↳ Testing Library Version: 124.4
+↳ Target Platform: arm64e-apple-macos14.0
+✔ Test run with 0 tests passed after 0.001 seconds.

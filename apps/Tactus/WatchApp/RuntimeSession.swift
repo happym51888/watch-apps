@@ -47,24 +47,31 @@ final class RuntimeSessionCoordinator: NSObject {
 }
 
 extension RuntimeSessionCoordinator: WKExtendedRuntimeSessionDelegate {
-    func extendedRuntimeSessionDidStart(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
-        state = .running
+    // WKExtendedRuntimeSessionDelegate is nonisolated, so these three cannot be
+    // main-actor-isolated members. They hop instead, carrying only Sendable values.
+    nonisolated func extendedRuntimeSessionDidStart(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        Task { @MainActor in self.state = .running }
     }
 
-    func extendedRuntimeSessionWillExpire(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+    nonisolated func extendedRuntimeSessionWillExpire(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
         // One hour is up. Nothing to do but let the invalidation land; the UI reads
         // `state` and tells the user why the click stopped instead of leaving them
         // wondering.
     }
 
-    func extendedRuntimeSession(
+    nonisolated func extendedRuntimeSession(
         _ extendedRuntimeSession: WKExtendedRuntimeSession,
         didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason,
         error: Error?
     ) {
-        session = nil
-        state = .ended(reason: Self.describe(reason))
-        onInvalidated?()
+        // `reason` is a plain enum, so describing it here keeps the hop Sendable
+        // without reaching for the session object itself.
+        let description = Self.describe(reason)
+        Task { @MainActor in
+            self.session = nil
+            self.state = .ended(reason: description)
+            self.onInvalidated?()
+        }
     }
 
     private static func describe(_ reason: WKExtendedRuntimeSessionInvalidationReason) -> String {

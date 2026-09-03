@@ -6,14 +6,18 @@ final class AstronomyTests: XCTestCase {
     // MARK: - Julian day, against worked examples in Meeus chapter 7
 
     func testJulianDayMatchesMeeusExamples() {
-        // Meeus 7.a: 1957 October 4.5 -> 2436116.5 at 0h, the Sputnik launch date.
-        XCTAssertEqual(julianDay(year: 1957, month: 10, day: 4), 2436116.5, accuracy: 1e-9)
+        // Meeus 7.a is stated for 1957 October 4.81 (the Sputnik launch) and
+        // gives JD 2436116.31. Midnight that day is therefore 2436116.31 - 0.81
+        // = 2436115.5. An earlier version of this test asserted 2436116.5,
+        // conflating the worked example's fractional day with 0h; CI caught it.
+        XCTAssertEqual(julianDay(year: 1957, month: 10, day: 4), 2436115.5, accuracy: 1e-9)
         // J2000.0 epoch: 2000 January 1.5 = JD 2451545.0, so 0h is 2451544.5.
         XCTAssertEqual(julianDay(year: 2000, month: 1, day: 1), 2451544.5, accuracy: 1e-9)
         // The Unix epoch.
         XCTAssertEqual(julianDay(year: 1970, month: 1, day: 1), 2440587.5, accuracy: 1e-9)
-        // A January date exercises the m <= 2 branch.
-        XCTAssertEqual(julianDay(year: 2026, month: 2, day: 28), 2461469.5, accuracy: 1e-9)
+        // A February date exercises the m <= 2 branch. (2461469.5 is 2027-03-05,
+        // which is what this line used to claim 2026-02-28 was.)
+        XCTAssertEqual(julianDay(year: 2026, month: 2, day: 28), 2461099.5, accuracy: 1e-9)
     }
 
     func testJulianDaysAreConsecutive() {
