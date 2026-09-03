@@ -86,7 +86,12 @@ metronomes exhibit in their reviews.
 This section used to say Swift compile errors were possible and unverified. They
 were, and the gap is now closed on GitHub Actions `macos-15` with Xcode 16.4.
 
-Final state, [run 33774061649](https://github.com/happym51888/watch-apps/actions/runs/33774061649):
+Compiling turned out to be the easy half. Every build and every test was green
+for several runs while three of the four apps could not be installed at all,
+and a fourth installed and came up with its core feature dead. Those are in
+"Install verification" below; this section is about the compiler.
+
+Build state, [run 33774061649](https://github.com/happym51888/watch-apps/actions/runs/33774061649):
 
 | xcodebuild | | swift test | |
 |---|---|---|---|
@@ -167,6 +172,47 @@ the run. The log showed the app path, then nothing, then a non-zero exit. The
 script now captures and prints that message, validates the identifier's shape
 rather than merely its emptiness, and carries an `ERR` trap that names the
 failing line and command.
+
+## Install verification (closed)
+
+A build says the code compiles. It says nothing about whether the result can be
+installed, launched, or is doing its job. `tools/simulator_smoke.sh` boots a
+watchOS simulator, installs the app, launches it, checks it is still alive and
+uncrashed, and photographs the screen.
+
+It found two defects that six green builds and 95 passing tests did not, both
+described above: three apps with no `CFBundleIdentifier`, and Awqat declaring
+`WKWatchOnly` alongside `WKRunsIndependentlyOfCompanionApp`, which simctl
+refuses outright.
+
+Final state, [run 33785551736](https://github.com/happym51888/watch-apps/actions/runs/33785551736)
+— all sixteen jobs green:
+
+| App | Installs | Launches | First screen |
+|---|---|---|---|
+| Kairos | yes | yes | "No accounts yet", with the pairing instruction |
+| Tactus | yes | yes | 100 bpm, 4/4, play and tap-tempo controls |
+| Awqat | yes | yes | Location permission sheet, showing this app's usage string |
+| Verba | yes | yes | Record button, "Tap to record" |
+
+**Read that table with the next paragraph attached.** The automated assertion is
+that the screen is not one flat colour. An error screen passes it. Kairos passed
+it in [run 33784284903](https://github.com/happym51888/watch-apps/actions/runs/33784284903)
+while displaying "Keychain unavailable — unexpectedStatus(-34018)", which is
+`errSecMissingEntitlement`: the smoke build passed `CODE_SIGNING_ALLOWED=NO`, an
+unsigned bundle carries no entitlements, and every keychain call therefore
+failed. Kairos exists to keep TOTP secrets in the keychain, so the app was
+entirely broken in the run that certified it green.
+
+Building ad-hoc signed (`CODE_SIGN_IDENTITY=-`) applies the entitlements file
+without needing a team or a provisioning profile, and Kairos now reaches the
+keychain and renders its real empty state. The general lesson is worth keeping:
+**turning code signing off to make CI simpler also turns off entitlements, and
+an app whose function depends on one will fail quietly rather than loudly.**
+
+The screenshots are uploaded on every run. A green job means "it did not crash";
+whether the right thing is on screen is still a human judgement, and the
+artefacts exist so that judgement can be made.
 
 ## Residual risk
 - **Untestable-here by nature:** actual haptic feel, whether `WKExtendedRuntimeSession`

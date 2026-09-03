@@ -30,7 +30,23 @@
 
 ---
 
-## 当前状态：四个应用全部编译通过、测试全绿
+## 当前状态：四个应用都能装上模拟器、跑起来、画出界面
+
+CI 现在有 16 个任务，全绿：6 个 `xcodebuild`、4 个 `swift test`、4 个模拟器安装、逻辑校验、Postgres schema。
+
+**编译通过和能用是两回事。** 前面好几轮，六个构建全绿、95 个测试全过，而其中三个应用根本装不上，第四个装上了但核心功能是死的。加了"装到模拟器上跑一遍并截图"这一步之后才暴露出来。细节在
+[`02-verification-status.md`](02-verification-status.md) 的 Install verification 一节。
+
+四个应用启动后的第一屏（截图是 CI 每轮的产物，可以下载）：
+
+| 应用 | 装得上 | 起得来 | 第一屏 |
+|---|---|---|---|
+| Kairos | 是 | 是 | "No accounts yet"，附配对说明 |
+| Tactus | 是 | 是 | 100 bpm、4/4、播放键与 TAP 键 |
+| Awqat | 是 | 是 | 定位授权弹窗，文案就是 plist 里写的那句 |
+| Verba | 是 | 是 | 红色录音键，"Tap to record" |
+
+自动断言只判断"屏幕不是一整块纯色"，**错误页也能过**。所以绿灯的含义是"没崩"，不是"对了"；截图每轮都传上来，就是留给人看的。
 
 GitHub Actions 的 `macos-15` runner 上，真实的 `xcodebuild` 和 `swift test`：
 
@@ -46,10 +62,13 @@ GitHub Actions 的 `macos-15` runner 上，真实的 `xcodebuild` 和 `swift tes
 六个目标全部 0 error。从第一次推上去到全绿一共八轮，中间修掉的都是**只有编译器才能发现的问题**：模块导入、Swift 6 数据竞争、协议隔离、类型检查超时、缺失的 `Hashable` conformance。清单见
 [`02-verification-status.md`](02-verification-status.md)。
 
-其中有两个值得单独说：
+其中有几个值得单独说：
 
 - **CI 曾经在骗人。** `continue-on-error: true` 是第一轮为了一次性看到所有错误加的，但它让任务在 `xcodebuild` 失败时依然报绿。第 5 轮 11 个任务全绿、实际两个构建是失败的，就是它造成的。现在两处都已删除，绿灯才有意义。
 - **测试写错了，代码是对的。** Awqat 有两个儒略日断言失败，查下来是我写测试时把 Meeus 书里的 "1957 October 4.81 → JD 2436116.31" 当成了午夜值。用 Python 独立算过之后确认：实现返回的 2436115.5 才对。
+- **三个应用编译干净、却没有 bundle id。** Kairos、Awqat、Verba 用的是手写的 `INFOPLIST_FILE`；XcodeGen 只往它*生成*的 plist 里补 `CFBundleIdentifier`，手写的原样保留，Xcode 也不补。Tactus 之所以没事，纯粹因为它是用 `info:` 块写的。没有 bundle id 的包能构建成功，但装不上、也上不了架。
+- **关掉代码签名，等于关掉 entitlements。** 模拟器构建原本传 `CODE_SIGNING_ALLOWED=NO`，于是 Kairos 每次读钥匙串都拿到 `-34018`（`errSecMissingEntitlement`），界面显示 "Keychain unavailable"——这个应用全部的意义就是把 TOTP 密钥存在钥匙串里。改成 ad-hoc 签名（`CODE_SIGN_IDENTITY=-`）后才真正跑到了那条路径。
+- **一次改名把构建搞挂在了注释上。** 用 PowerShell 的 `Set-Content` 改 bundle id，把 `project.yml` 按系统 ANSI 代码页重写了一遍，三个破折号被截断成非法 UTF-8。本地毫无反应，XcodeGen 在 runner 上直接拒绝解析。现在 `tools/check_encoding.py` 会拦住。
 
 ## 核心逻辑另有一层验证（编译之外）
 
