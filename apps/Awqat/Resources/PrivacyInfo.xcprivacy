@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	Privacy manifest. Required at submission since spring 2024.
+
+	Awqat uses location, and NSPrivacyCollectedDataTypes is still empty. That
+	is not an oversight: this key declares data *collected*, meaning
+	transmitted off the device. Awqat has no networking code. Prayer times are
+	computed on the watch from the coordinates using the solar position
+	algorithms in Sources/AwqatCore, which is the whole reason the astronomy
+	is implemented here rather than fetched from an API.
+
+	The coordinates are cached in UserDefaults so the app can show times
+	before a fix arrives — again, on device only.
+
+	The App Store Connect privacy questionnaire is a separate form and asks a
+	different question ("does your app use location?"). Answer yes there, and
+	select "not collected" / "not linked to the user" / "not used for
+	tracking".
+
+	The purpose string is NSLocationWhenInUseUsageDescription in
+	WatchApp/Info.plist. When-in-use, not always: prayer times need a fix
+	occasionally, not a movement history.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

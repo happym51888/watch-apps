@@ -36,10 +36,15 @@ targets:
     sources:
       - path: PhoneApp
       - path: Sources/VerbaCore
+      # The iPhone app is a real, launchable app, so it needs its own icon and
+      # its own privacy manifest. Neither was wired up here.
+      - path: Resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.verba
         INFOPLIST_FILE: PhoneApp/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         TARGETED_DEVICE_FAMILY: "1,2"
     dependencies:
       - target: VerbaWatch

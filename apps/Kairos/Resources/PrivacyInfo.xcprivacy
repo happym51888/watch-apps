@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	Privacy manifest. Required at submission since spring 2024.
+
+	Kairos collects nothing, and that is not a marketing claim — it has no
+	networking code at all. The shared secrets live in the Keychain with
+	kSecAttrAccessibleWhenUnlockedThisDeviceOnly, so they are not in an
+	iCloud backup and do not follow the user to a new device. Codes are
+	computed locally from the clock.
+
+	NSPrivacyAccessedAPITypes is empty because Kairos touches none of the
+	required-reason categories: Keychain is not one of them, and it stores
+	accounts there rather than in UserDefaults precisely because secrets do
+	not belong in a plist.
+
+	The camera on the iPhone side is a permission, not a collection: the QR
+	code is decoded in memory and never stored or transmitted. Its purpose
+	string is NSCameraUsageDescription in PhoneApp/Info.plist.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>

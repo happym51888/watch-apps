@@ -59,6 +59,16 @@ jobs:
       - name: Memo upsert never blanks a populated field
         run: python apps/Verba/validation/verify_upsert.py
 
+      - name: Privacy manifests match what the code calls
+        run: python tools/check_privacy_manifests.py
+
+      # Guards against continue-on-error coming back. See the script's header:
+      # it is why run 5 reported 11/11 green with two builds failing.
+      - name: CI can still fail
+        run: |
+          pip install --quiet pyyaml
+          python tools/check_workflow.py
+
   # -------------------------------------------------------------------------
   # The database half of Verba, against a real PostgreSQL server.
   #
@@ -237,3 +247,56 @@ jobs:
         with:
           name: build-log-${{ matrix.scheme }}
           path: apps/${{ matrix.app }}/build-${{ matrix.scheme }}.log
+
+  # -------------------------------------------------------------------------
+  # Does it actually run?
+  #
+  # Everything above proves the code compiles. None of it proves the app
+  # launches: any of these could crash in `App.init` or draw a blank screen
+  # and every job would still be green. This installs each watch app on a
+  # watchOS simulator, launches it, checks for a crash report, and inspects
+  # the screenshot to confirm something was drawn.
+  #
+  # The screenshots are uploaded because App Store Connect needs watch
+  # screenshots and there is no Mac here to take them by hand.
+  # -------------------------------------------------------------------------
+  simulator-smoke:
+    name: launches on simulator (${{ matrix.scheme }})
+    runs-on: macos-15
+    needs: watch-build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: Kairos
+            scheme: KairosWatch
+          - app: Tactus
+            scheme: TactusWatch
+          - app: Awqat
+            scheme: AwqatWatch
+          - app: Verba
+            scheme: VerbaWatch
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stub Supabase config
+        if: matrix.app == 'Verba'
+        run: cp apps/Verba/PhoneApp/Supabase.example.plist apps/Verba/PhoneApp/Supabase.plist
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Show available watchOS runtimes
+        run: xcrun simctl list runtimes
+
+      - name: Launch and capture
+        run: bash tools/simulator_smoke.sh apps/${{ matrix.app }} ${{ matrix.scheme }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshot-${{ matrix.scheme }}
+          path: screenshots/

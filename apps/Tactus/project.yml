@@ -50,6 +50,9 @@ targets:
       - path: Sources/TactusCore
       - path: WatchApp
       - path: Resources/Assets.xcassets
+      # Listed explicitly rather than including all of Resources, to keep the
+      # narrow path above intact.
+      - path: Resources/PrivacyInfo.xcprivacy
     dependencies:
       - target: TactusComplication
         embed: true
