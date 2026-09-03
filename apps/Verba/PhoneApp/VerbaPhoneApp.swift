@@ -1,6 +1,5 @@
 import SwiftUI
 import WatchConnectivity
-import VerbaCore
 
 /// The iPhone side. It does the two things the watch physically cannot:
 /// transcribe (no speech API exists on watchOS) and hold a long-lived network

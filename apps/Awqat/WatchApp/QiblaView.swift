@@ -1,7 +1,6 @@
 import SwiftUI
 import CoreLocation
 import Observation
-import AwqatCore
 
 /// Qibla direction.
 ///

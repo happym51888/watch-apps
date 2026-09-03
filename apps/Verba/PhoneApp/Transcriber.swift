@@ -1,7 +1,6 @@
 import Foundation
 import AVFoundation
 import Speech
-import VerbaCore
 
 /// Speech-to-text. Runs on the iPhone, because it cannot run anywhere else.
 ///

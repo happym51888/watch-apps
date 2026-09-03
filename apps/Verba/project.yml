@@ -11,78 +11,59 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
-    ENABLE_USER_SCRIPT_SANDBOXING: YES
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
+    # Set your Team ID here, or pick a team in Xcode's Signing pane.
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
 
-packages:
-  VerbaCore:
-    path: .
+# Note there is no `packages:` block. Sources/VerbaCore is compiled straight
+# into each target instead of being consumed as a local SwiftPM package, which
+# is why the app-layer files do not `import VerbaCore` — inside the Xcode build
+# it is all one module. Package.swift still builds the core as a real module
+# and is what `swift test` uses, so the tests are unaffected either way.
 
 targets:
 
   # The iPhone app is a real app here, not a stub container: it does the
   # transcription, because watchOS has no speech API at all. That also means
   # this ships as a normal paired app and avoids the watch-only submission
-  # dance entirely.
+  # dance the other apps in this repo need.
   Verba:
     type: application
     platform: iOS
     sources:
       - path: PhoneApp
-    dependencies:
-      - package: VerbaCore
-        product: VerbaCore
-      - target: VerbaWatch
-        embed: true
-    info:
-      path: PhoneApp/Info.plist
-      properties:
-        CFBundleDisplayName: Verba
-        UILaunchScreen: {}
-        UISupportedInterfaceOrientations:
-          - UIInterfaceOrientationPortrait
-        NSSpeechRecognitionUsageDescription: >-
-          Verba turns your recordings into text on this iPhone, so the audio
-          never leaves your devices.
-        NSMicrophoneUsageDescription: >-
-          Verba records voice memos on this iPhone as well as on your Watch.
+      - path: Sources/VerbaCore
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.verba
-        INFOPLIST_KEY_CFBundleDisplayName: Verba
+        INFOPLIST_FILE: PhoneApp/Info.plist
         TARGETED_DEVICE_FAMILY: "1,2"
+    dependencies:
+      - target: VerbaWatch
+        embed: true
 
   VerbaWatch:
     type: application
     platform: watchOS
     sources:
       - path: WatchApp
+      - path: Sources/VerbaCore
       - path: Resources
-    dependencies:
-      - package: VerbaCore
-        product: VerbaCore
-    info:
-      path: WatchApp/Info.plist
-      properties:
-        CFBundleDisplayName: Verba
-        WKApplication: true
-        WKCompanionAppBundleIdentifier: app.verba
-        NSMicrophoneUsageDescription: >-
-          Verba records what you say. Recording starts only when you tap the
-          button.
-        # `audio` is what lets a recording continue after you lower your wrist.
-        # It cannot *start* a recording in the background — Apple does not
-        # permit that for anyone — so there is no review argument to have here:
-        # this is an audio app doing audio.
-        WKBackgroundModes:
-          - audio
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.verba.watchkitapp
-        INFOPLIST_KEY_CFBundleDisplayName: Verba
+        INFOPLIST_FILE: WatchApp/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+# No unit-test target on purpose. `Tests/VerbaCoreTests` uses
+# `@testable import VerbaCore`, which needs VerbaCore to be a real module — it
+# is, under Package.swift, and `swift test` runs it there. An Xcode test target
+# that compiled the core sources in directly would break that import for no
+# benefit, since the same tests already run in CI.
 
 schemes:
   Verba:
@@ -90,10 +71,6 @@ schemes:
       targets:
         Verba: all
         VerbaWatch: all
-    test:
-      gatherCoverageData: true
-      targets:
-        - VerbaCoreTests
   VerbaWatch:
     build:
       targets:

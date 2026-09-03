@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verba</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!--
+  Deliberately no build step. This is one HTML file, one stylesheet, one
+  module, and the Supabase client from a CDN — because a static page cannot
+  rot. There is no bundler to upgrade, no lockfile to audit, and no node
+  version that stops working in two years. It runs from any static host, and
+  the "backend" is the same Postgres the phone app writes to.
+-->
+
+<header>
+  <h1>Verba</h1>
+  <div id="session-bar" hidden>
+    <span id="session-email"></span>
+    <button id="sign-out" class="ghost">Sign out</button>
+  </div>
+</header>
+
+<!-- Configuration problems are shown, not logged to a console nobody opens. -->
+<div id="config-error" class="notice error" hidden></div>
+
+<main>
+
+  <section id="auth" hidden>
+    <form id="sign-in-form">
+      <h2>Sign in</h2>
+      <p class="hint">The same account your iPhone uses.</p>
+      <label>Email
+        <input type="email" id="email" autocomplete="username" required>
+      </label>
+      <label>Password
+        <input type="password" id="password" autocomplete="current-password" required>
+      </label>
+      <button type="submit" id="sign-in">Sign in</button>
+      <p id="auth-error" class="notice error" hidden></p>
+    </form>
+  </section>
+
+  <section id="library" hidden>
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Search transcripts…"
+             autocomplete="off" spellcheck="false">
+      <span id="result-count" class="hint"></span>
+    </div>
+
+    <div id="empty" class="notice" hidden></div>
+    <ul id="memos"></ul>
+
+    <button id="load-more" class="ghost" hidden>Load older</button>
+  </section>
+
+</main>
+
+<!--
+  Pinned to a major version rather than @latest. A CDN import that silently
+  follows breaking changes is a page that works until the morning it doesn't,
+  with no commit to blame.
+-->
+<script type="module" src="app.js"></script>
+
+</body>
+</html>

@@ -1,5 +1,4 @@
 import SwiftUI
-import AwqatCore
 
 struct SettingsView: View {
     @Environment(PrayerModel.self) private var model

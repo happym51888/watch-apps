@@ -1,5 +1,4 @@
 import SwiftUI
-import KairosCore
 
 /// The screen the whole app exists for: raise your wrist, read the code.
 ///

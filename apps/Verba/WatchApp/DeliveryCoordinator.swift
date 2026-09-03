@@ -1,7 +1,6 @@
 import Foundation
 import Observation
 import WatchConnectivity
-import VerbaCore
 
 /// Turns the pure `TransferQueue` into actual transfers, and persists it.
 ///

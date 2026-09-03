@@ -1,5 +1,4 @@
 import SwiftUI
-import VerbaCore
 
 @main
 struct VerbaApp: App {

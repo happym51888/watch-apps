@@ -2,7 +2,6 @@ import Foundation
 import Observation
 import CoreLocation
 import WidgetKit
-import AwqatCore
 
 /// Holds the timetable and everything derived from it.
 ///

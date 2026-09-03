@@ -1,7 +1,6 @@
 import SwiftUI
 import AVFoundation
 import WatchConnectivity
-import KairosCore
 
 /// The iPhone side exists for exactly two reasons: it has a camera, and the
 /// App Store needs somewhere to put the product page. It is deliberately not a

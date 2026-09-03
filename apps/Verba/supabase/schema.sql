@@ -20,6 +20,9 @@
 --   default when you forget is the second one.
 
 create extension if not exists "pgcrypto";
+-- Trigram index support. This is what makes searching Chinese transcripts
+-- work; see the note above the index definition below.
+create extension if not exists "pg_trgm";
 
 -- ---------------------------------------------------------------------------
 -- memos
@@ -69,12 +72,29 @@ create index if not exists memos_user_started_idx
 
 -- Full-text search over transcripts. Generated rather than maintained by a
 -- trigger so it cannot drift out of sync with the column it indexes.
+--
+-- Word-boundary search, and only useful for languages that have word
+-- boundaries. `to_tsvector('simple', '明天下午三点开会')` produces a single
+-- token, because Postgres has no Chinese segmenter built in — so full-text
+-- search over Chinese transcripts matches nothing unless the query happens to
+-- be the entire sentence. That is a silent empty result, not an error, which
+-- is why the trigram index below exists.
 alter table public.memos
     add column if not exists transcript_search tsvector
     generated always as (to_tsvector('simple', coalesce(transcript, ''))) stored;
 
 create index if not exists memos_search_idx
     on public.memos using gin (transcript_search);
+
+-- Substring search, which works for every language including Chinese and
+-- Japanese. `ilike '%开会%'` finds what full-text search cannot.
+--
+-- The trigram index is what keeps it from being a full table scan: a leading
+-- wildcard defeats a normal btree index, so without this an `ilike '%...%'`
+-- over a few thousand memos reads every row. This is the index the web client
+-- relies on.
+create index if not exists memos_transcript_trgm_idx
+    on public.memos using gin (transcript gin_trgm_ops);
 
 -- ---------------------------------------------------------------------------
 -- updated_at

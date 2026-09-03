@@ -1,5 +1,4 @@
 import SwiftUI
-import VerbaCore
 
 /// What is on the watch and where it has got to.
 ///

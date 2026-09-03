@@ -1,6 +1,5 @@
 import SwiftUI
 import WatchKit
-import KairosCore
 
 /// One account, filling the screen.
 ///

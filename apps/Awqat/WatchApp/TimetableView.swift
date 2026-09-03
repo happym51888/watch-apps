@@ -1,5 +1,4 @@
 import SwiftUI
-import AwqatCore
 
 /// The main screen: what is next, then the whole day.
 struct TimetableView: View {

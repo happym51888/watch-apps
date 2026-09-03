@@ -241,7 +241,20 @@ PhoneApp/
   SupabaseStore.swift       three URLRequests, no SDK
   VerbaPhoneApp.swift       inbox → transcribe → sync
 
+web/                      search / play / edit from a laptop, no build step
+  index.html                one page
+  app.js                    Supabase REST via the CDN client
+  style.css                 plain CSS
+  README.md                 why search uses ilike and not full-text search
+
 supabase/schema.sql       table, bucket, RLS, upsert function
 validation/               the Python ports and their assertions
 Tests/VerbaCoreTests/     the same properties as XCTest, for `swift test`
 ```
+
+The web client is four static files against the same Postgres — see
+[`web/README.md`](web/README.md). Two things there are load-bearing and
+non-obvious: search uses `ilike` with a `pg_trgm` index rather than the
+`tsvector` column, because Postgres cannot segment Chinese and full-text search
+over Chinese transcripts returns a silent empty result; and paging is keyset
+rather than `OFFSET`, because recordings arrive while you scroll.

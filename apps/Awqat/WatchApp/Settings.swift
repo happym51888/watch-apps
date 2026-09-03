@@ -1,5 +1,4 @@
 import Foundation
-import AwqatCore
 
 /// Everything the user can change, in one Codable value.
 ///

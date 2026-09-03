@@ -1,5 +1,4 @@
 import Foundation
-import VerbaCore
 
 /// Minimal Supabase client, hand-rolled against the REST and Storage endpoints.
 ///

@@ -1,6 +1,5 @@
 import Foundation
 import Observation
-import KairosCore
 
 /// Drives the list and the code screens.
 ///

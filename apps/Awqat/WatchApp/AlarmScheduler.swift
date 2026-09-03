@@ -1,7 +1,6 @@
 import Foundation
 import UserNotifications
 import WatchKit
-import AwqatCore
 
 /// Prayer alerts, split deliberately into two mechanisms.
 ///

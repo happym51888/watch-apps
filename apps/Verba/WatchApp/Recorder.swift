@@ -2,7 +2,6 @@ import Foundation
 import AVFoundation
 import Observation
 import WatchKit
-import VerbaCore
 
 /// Audio capture on the watch.
 ///
