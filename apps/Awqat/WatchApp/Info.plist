@@ -27,10 +27,12 @@
 	<true/>
 	<!-- Watch-only: no WKCompanionAppBundleIdentifier, and WKWatchOnly set.
 	     Everything is computed on the watch, so there is nothing for a phone
-	     app to do. -->
+	     app to do.
+
+	     WKRunsIndependentlyOfCompanionApp must NOT appear alongside this.
+	     There is no companion to run independently of, and installation is
+	     refused outright: "Having both defined is not allowed." -->
 	<key>WKWatchOnly</key>
-	<true/>
-	<key>WKRunsIndependentlyOfCompanionApp</key>
 	<true/>
 
 	<!-- The Fajr alarm uses an extended runtime session of type .alarm. This

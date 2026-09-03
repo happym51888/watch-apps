@@ -170,11 +170,20 @@ def main() -> int:
             # 3/4. Companion wiring is coherent.
             companion = properties.get("WKCompanionAppBundleIdentifier")
             watch_only = properties.get("WKWatchOnly", False)
+            independent = "WKRunsIndependentlyOfCompanionApp" in properties
             if target.get("platform") == "watchOS" and target.get("type") in APP_TYPES:
                 if watch_only:
                     report.check(
                         companion is None,
                         f"{source}: watch-only app declares no companion",
+                    )
+                    # simctl refuses the install outright: "This app defines
+                    # both WKWatchOnly and WKRunsIndependentlyOfCompanionApp
+                    # ... Having both defined is not allowed."
+                    report.check(
+                        not independent,
+                        f"{source}: watch-only app omits "
+                        f"WKRunsIndependentlyOfCompanionApp",
                     )
                 else:
                     report.check(
