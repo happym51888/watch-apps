@@ -36,6 +36,11 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
+# Terms that should not appear in a public repo built on a work machine.
+# Assembled from fragments because this file is scanned like any other, and
+# spelled out in full the pattern matches its own source.
+_INTERNAL = ("n" + "okia", "confluence" + r"\.ext", "ext" + r"\.net")
+
 PATTERNS = {
     "JWT (Supabase anon or service-role key)":
         re.compile(r"eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}"),
@@ -50,7 +55,7 @@ PATTERNS = {
     "real Supabase project URL":
         re.compile(r"https://[a-z0-9]{18,}\.supabase\.co"),
     "employer or internal hostname":
-        re.compile(r"(?i)\b(?:nokia|confluence\.ext|ext\.net)\b"),
+        re.compile(r"(?i)\b(?:" + "|".join(_INTERNAL) + r")\b"),
     "assigned password or token literal":
         re.compile(r"(?i)\b(?:password|passwd|secret|token)\s*[=:]\s*[\"'][^\"'\s{}$<]{8,}"),
 }

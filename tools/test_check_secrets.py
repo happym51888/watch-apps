@@ -7,6 +7,14 @@ instructions depend on are treated as required.
 
 The fake keys below are syntactically valid and cryptographically worthless:
 the JWT is a real base64 header and payload with a nonsense signature.
+
+Every one of them is assembled from fragments at runtime, so that no literal
+credential shape appears in this file's source. That is not decoration. This
+file is tracked, so check_secrets.py scans it like any other, and written out
+in full the fixtures make the checker fail on a clean tree — which is exactly
+what happened on the first push. Exempting the file would have worked and
+would also have created the one place in the repo where a real key could hide.
+Keep the fragments split.
 """
 
 from __future__ import annotations
@@ -19,21 +27,28 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CHECKER = ROOT / "tools" / "check_secrets.py"
 VICTIM = ROOT / "apps" / "Verba" / "web" / "config.example.js"
 
+DOT = "."
+JWT_HEADER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+
 PLANTS = {
-    "Supabase anon key": (
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-        "eyJyb2xlIjoiYW5vbiIsImlhdCI6MTcwMDAwMDAwMH0.not_a_real_signature_at_all"
-    ),
-    "service-role JWT": (
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-        "eyJyb2xlIjoic2VydmljZV9yb2xlIn0.also_entirely_fake_signature_here"
-    ),
-    "real project URL": "https://abcdefghijklmnopqrst.supabase.co",
-    "GitHub token": "ghp_0123456789abcdefghijklmnopqrstuvwxyz",
-    "AWS key id": "AKIAIOSFODNN7EXAMPLE",
-    "private key block": "-----BEGIN RSA PRIVATE KEY-----",
-    "assigned password": 'password: "hunter2hunter2"',
-    "employer hostname": "confluence.ext.example.internal",
+    "Supabase anon key":
+        JWT_HEADER + DOT + "eyJyb2xlIjoiYW5vbiIsImlhdCI6MTcwMDAwMDAwMH0"
+        + DOT + "not_a_real_signature_at_all",
+    "service-role JWT":
+        JWT_HEADER + DOT + "eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNzAwMH0"
+        + DOT + "also_entirely_fake_signature",
+    "real project URL":
+        "https://" + "abcdefghijklmnopqrst" + DOT + "supabase.co",
+    "GitHub token":
+        "ghp" + "_" + "0123456789abcdefghijklmnopqrstuvwxyz",
+    "AWS key id":
+        "AKIA" + "IOSFODNN7EXAMPLE",
+    "private key block":
+        "-----BEGIN RSA " + "PRIVATE KEY-----",
+    "assigned password":
+        "password: " + '"hunter2hunter2"',
+    "employer hostname":
+        "confluence" + DOT + "ext.example.internal",
 }
 
 
