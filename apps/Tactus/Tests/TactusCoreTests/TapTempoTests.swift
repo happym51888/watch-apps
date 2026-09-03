@@ -28,7 +28,7 @@ final class TapTempoTests: XCTestCase {
 
     /// One fumbled tap in an otherwise steady sequence should barely move the
     /// estimate — this is what the median buys over a mean.
-    func testOneBadTapDoesNotWreckTheEstimate() {
+    func testOneBadTapDoesNotWreckTheEstimate() throws {
         var tempo = TapTempo()
         let taps: [TimeInterval] = [0, 0.5, 1.0, 1.5, 1.62, 2.5, 3.0, 3.5]
         for t in taps { tempo.tap(at: t) }
@@ -60,7 +60,7 @@ final class TapTempoTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(tempo.estimate), 80, accuracy: 1e-9)
     }
 
-    func testEstimateIsClampedToTheSupportedRange() {
+    func testEstimateIsClampedToTheSupportedRange() throws {
         var tempo = TapTempo()
         tempo.tap(at: 0)
         // An implausibly fast double-tap must not produce a 6000 bpm setting.

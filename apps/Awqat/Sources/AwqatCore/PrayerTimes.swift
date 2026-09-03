@@ -73,6 +73,15 @@ public struct PrayerTimes: Sendable {
     public let maghrib: Date
     public let isha: Date
 
+    /// Apparent sunset, before any Maghrib convention is applied.
+    ///
+    /// Not a prayer, and deliberately kept out of `Prayer` and the timetable.
+    /// It is exposed because Maghrib equals sunset under most conventions but is
+    /// depressed below it under a few (Tehran), and there is no way to check
+    /// that the depression happened — or to explain the difference to a user
+    /// comparing against a local timetable — without being able to see both.
+    public let sunset: Date
+
     /// Returns nil in the polar case, where the sun does not cross the horizon at
     /// all on this day and sunrise/sunset are undefined. Callers should surface
     /// that honestly rather than invent a time.
@@ -136,6 +145,10 @@ public struct PrayerTimes: Sendable {
         self.method = method
         self.fajr = Self.instant(base, fajrUT, plusMinutes: adjust.fajr)
         self.sunrise = Self.instant(base, sunriseUT, plusMinutes: adjust.sunrise)
+        // No adjustment applied: the per-prayer offsets exist to match a local
+        // mosque's published timetable, and sunset is an astronomical fact
+        // rather than a listed prayer time.
+        self.sunset = Self.instant(base, sunsetUT, plusMinutes: 0)
         self.dhuhr = Self.instant(base, transitUT, plusMinutes: parameters.dhuhrOffsetMinutes + adjust.dhuhr)
         self.asr = Self.instant(base, asrUT, plusMinutes: adjust.asr)
         self.maghrib = Self.instant(base, maghribUT, plusMinutes: adjust.maghrib)

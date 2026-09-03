@@ -60,7 +60,12 @@ struct ScannerView: UIViewControllerRepresentable {
 
             // Re-arm after a beat so a second account can be scanned without
             // leaving the screen.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+            //
+            // A `Task` rather than `DispatchQueue.asyncAfter`: that takes a
+            // `@Sendable` closure, and this one captures the coordinator, which
+            // is not Sendable. Staying on the main actor sidesteps it entirely.
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(2))
                 self?.hasDelivered = false
             }
         }
@@ -70,7 +75,12 @@ struct ScannerView: UIViewControllerRepresentable {
 final class ScannerViewController: UIViewController {
     weak var coordinator: ScannerView.Coordinator?
 
-    private let session = AVCaptureSession()
+    // `AVCaptureSession` is not `Sendable`, but `startRunning()` and
+    // `stopRunning()` are documented as safe to call off the main thread — and
+    // they block, which is exactly why they must not run on it. The annotation
+    // records that contract instead of pretending the type is Sendable.
+    private nonisolated(unsafe) let session = AVCaptureSession()
+    private let sessionQueue = DispatchQueue(label: "app.kairos.scanner.session")
     private var preview: AVCaptureVideoPreviewLayer?
 
     override func viewDidLoad() {
@@ -120,7 +130,8 @@ final class ScannerViewController: UIViewController {
 
         // startRunning blocks; keeping it off the main thread avoids the
         // hitch on presenting this screen.
-        Task.detached { [session] in session.startRunning() }
+        nonisolated(unsafe) let session = self.session
+        sessionQueue.async { session.startRunning() }
     }
 
     override func viewDidLayoutSubviews() {
@@ -130,6 +141,7 @@ final class ScannerViewController: UIViewController {
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        Task.detached { [session] in session.stopRunning() }
+        nonisolated(unsafe) let session = self.session
+        sessionQueue.async { session.stopRunning() }
     }
 }

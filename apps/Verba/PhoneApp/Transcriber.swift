@@ -12,14 +12,18 @@ import Speech
 /// and transcription happens here for free, on-device, with nothing leaving the
 /// user's hardware.
 ///
-/// Two engines, preferred in order:
+/// Uses `SFSpeechRecognizer`, which is also the reason `ChunkPlan` exists: it
+/// handles roughly a minute of audio per request, so anything longer is fed
+/// through in overlapping windows and stitched back together by
+/// `TranscriptStitcher`.
 ///
-/// 1. `SpeechAnalyzer` / `SpeechTranscriber` (iOS 26+). Newer models, designed
-///    for long-form audio, and no per-request duration ceiling.
-/// 2. `SFSpeechRecognizer` (iOS 10+). The fallback, and the reason `ChunkPlan`
-///    exists: it is documented to handle roughly a minute of audio per request,
-///    so anything longer is fed through in overlapping windows and stitched
-///    back together by `TranscriptStitcher`.
+/// An earlier version of this file also had a `SpeechAnalyzer` path for iOS 26,
+/// written from the documentation. CI rejected it — `SpeechAnalyzer`,
+/// `SpeechTranscriber` and `AssetInventory` are all "cannot find in scope"
+/// against the SDK on the runner — so it is gone rather than left in as
+/// plausible-looking dead code. If you build against an SDK that has it, it is
+/// worth adding back: newer models, and no per-request duration ceiling, which
+/// would make the chunking below unnecessary.
 actor Transcriber {
 
     enum TranscribeError: LocalizedError {
@@ -64,67 +68,14 @@ actor Transcriber {
         guard await Self.requestAuthorization() else { throw TranscribeError.notAuthorised }
 
         let duration = try await Self.duration(of: url)
-
-        // NOTE: the `SpeechAnalyzer` call below is written against the iOS 26
-        // API as documented and has not been compiled. If it does not build
-        // against your SDK, delete this branch — the legacy path underneath is
-        // complete and handles every case, just with more seams.
-        if #available(iOS 26.0, *) {
-            if let modern = try? await transcribeWithAnalyzer(url, recordingID: recordingID) {
-                return modern
-            }
-        }
-
-        return try await transcribeWithLegacyRecogniser(
+        return try await transcribeWithRecogniser(
             url, recordingID: recordingID, duration: duration
         )
     }
 
-    // MARK: - Modern path
+    // MARK: - Recognition
 
-    @available(iOS 26.0, *)
-    private func transcribeWithAnalyzer(
-        _ url: URL,
-        recordingID: RecordingID
-    ) async throws -> Transcript {
-        let transcriber = SpeechTranscriber(
-            locale: locale,
-            transcriptionOptions: [],
-            reportingOptions: [],
-            attributeOptions: []
-        )
-
-        // Models are downloaded on demand and are large. Doing this before the
-        // first transcription rather than during it is the difference between
-        // a progress bar and an apparent hang.
-        if let request = await AssetInventory.assetInstallationRequest(supporting: [transcriber]) {
-            try await request.downloadAndInstall()
-        }
-
-        let analyzer = SpeechAnalyzer(modules: [transcriber])
-        let audioFile = try AVAudioFile(forReading: url)
-        try await analyzer.analyzeSequence(from: audioFile)
-        try await analyzer.finalizeAndFinishThroughEndOfInput()
-
-        var text = ""
-        for try await result in transcriber.results {
-            text += String(result.text.characters)
-        }
-
-        let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleaned.isEmpty else { throw TranscribeError.producedNothing }
-
-        return Transcript(
-            recordingID: recordingID,
-            text: cleaned,
-            locale: locale.identifier(.bcp47),
-            engine: .appleOnDevice
-        )
-    }
-
-    // MARK: - Legacy path
-
-    private func transcribeWithLegacyRecogniser(
+    private func transcribeWithRecogniser(
         _ url: URL,
         recordingID: RecordingID,
         duration: TimeInterval

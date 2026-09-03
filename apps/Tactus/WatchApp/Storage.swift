@@ -50,7 +50,11 @@ enum Storage {
         static let presets = "presets"
     }
 
-    private static let defaults = UserDefaults.standard
+    // `UserDefaults` is thread-safe but is not annotated `Sendable`, so a
+    // static reference to it is rejected under strict concurrency. The
+    // annotation records that the safety is real and comes from the framework,
+    // rather than silencing an actual race.
+    private nonisolated(unsafe) static let defaults = UserDefaults.standard
 
     static var settings: MetronomeSettings? {
         get {

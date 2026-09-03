@@ -103,7 +103,10 @@ final class OTPVectorTests: XCTestCase {
 
     func testCounterAdvancesExactlyOncePerPeriod() {
         for period in [15, 30, 60, 90] {
-            let base = 1_700_000_000 - (1_700_000_000 % TimeInterval(period))
+            // Integer remainder, then convert. `%` is unavailable on Double,
+            // and writing it with a TimeInterval operand makes the literals
+            // Double too.
+            let base = TimeInterval(1_700_000_000 - (1_700_000_000 % period))
             let start = Date(timeIntervalSince1970: base)
             let justBefore = Date(timeIntervalSince1970: base + TimeInterval(period) - 0.001)
             let next = Date(timeIntervalSince1970: base + TimeInterval(period))
@@ -126,7 +129,10 @@ final class OTPVectorTests: XCTestCase {
     /// blink empty for a frame.
     func testCountdownStaysInsideTheOpenInterval() {
         for period in [15, 30, 60] {
-            let base = 1_700_000_000 - (1_700_000_000 % TimeInterval(period))
+            // Integer remainder, then convert. `%` is unavailable on Double,
+            // and writing it with a TimeInterval operand makes the literals
+            // Double too.
+            let base = TimeInterval(1_700_000_000 - (1_700_000_000 % period))
             for offset in 0..<(period * 2) {
                 let date = Date(timeIntervalSince1970: base + TimeInterval(offset))
                 let remaining = OTP.secondsRemaining(at: date, period: period)
@@ -147,7 +153,10 @@ final class OTPVectorTests: XCTestCase {
     func testGuaranteedClockSkewTolerance() {
         let period = 30
         for phase in 0..<period {
-            let base = 1_700_000_000 - (1_700_000_000 % TimeInterval(period)) + TimeInterval(phase)
+            // Integer remainder, then convert. `%` is unavailable on Double,
+            // and writing it with a TimeInterval operand makes the literals
+            // Double too.
+            let base = TimeInterval(1_700_000_000 - (1_700_000_000 % period)) + TimeInterval(phase)
             let server = OTP.counter(at: Date(timeIntervalSince1970: base), period: period)
             for skew in [-30, 30] {
                 let drifted = OTP.counter(

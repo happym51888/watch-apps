@@ -79,7 +79,11 @@ extension LocationProvider: CLLocationManagerDelegate {
             switch authorization {
             case .authorizedWhenInUse, .authorizedAlways:
                 self.status = .locating
-                manager.requestLocation()
+                // `self.manager`, not the callback's parameter. `CLLocationManager`
+                // is not Sendable, so capturing the argument here would send it
+                // across isolation; the stored property is already main-actor
+                // isolated and is the same object.
+                self.manager.requestLocation()
             case .denied, .restricted:
                 self.status = .denied
             default:

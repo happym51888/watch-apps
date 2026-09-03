@@ -293,7 +293,10 @@ private struct ManualEntryView: View {
         } catch Base32.DecodeError.truncated {
             error = "That key looks cut short — check for a missing character."
         } catch {
-            error = "That key isn't valid base32."
+            // `self.error`, not `error`: a bare `catch` implicitly binds the
+            // thrown value to the name `error`, which shadows the @State
+            // property of the same name and is immutable.
+            self.error = "That key isn't valid base32."
         }
     }
 }
