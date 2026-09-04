@@ -97,6 +97,29 @@ is that it does not.
 Neither validator touches the network. The Oslo instants were fetched once and
 committed, so CI replays them.
 
+### A second reader, and the one thing it drops
+
+`_partridge_crosscheck.py` reads the same fixture with
+[partridge](https://github.com/remix/partridge), an unrelated GTFS library, and
+compares. Trips, routes, `stop_times` rows, `calendar_dates` rows and every
+field of a sampled trip agree exactly.
+
+`stops.txt` does not, and the difference is the interesting part. The file has
+**74 rows: 42 quays and 32 stations.** partridge prunes to the 42, because a
+station never appears in `stop_times` — a bus calls at a platform, not at a
+building. That is a reasonable thing for a analysis library to do and a fatal
+thing for this app to do: those 32 rows are the whole basis of "asking about a
+station asks about its platforms", which is the shape of stop a person actually
+names out loud. Load the pruned view and the app cannot answer for any station
+at all.
+
+Not in CI — partridge pulls in pandas, numpy and networkx, which is a lot of
+runner for a check the Entur replay mostly subsumes. Run it by hand:
+
+```sh
+.venv/Scripts/python.exe validation/_partridge_crosscheck.py
+```
+
 ## How it works
 
 The phone does the heavy lifting once; the watch does arithmetic forever.
