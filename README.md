@@ -94,6 +94,10 @@ python apps/Awqat/validation/verify_astronomy.py    # PASS
 python apps/Verba/validation/verify_queue.py        # PASS (3,054,303 assertions)
 python apps/Verba/validation/verify_transcript.py   # PASS (23,259 assertions)
 python apps/Verba/validation/verify_upsert.py       # PASS (36 assertions)
+python apps/Proxima/validation/verify_gtfs.py       # PASS (670 assertions)
+python apps/Proxima/validation/verify_swift_vectors.py  # PASS (49 expectations)
+python apps/Volumen/validation/verify_book.py       # PASS (50,595 assertions)
+python apps/Volumen/validation/verify_id3.py        # PASS (115 assertions)
 ```
 
 | 应用 | 对照基准 | 结果 |
@@ -104,6 +108,9 @@ python apps/Verba/validation/verify_upsert.py       # PASS (36 assertions)
 | Verba | 400 轮随机事件流，含 6,927 次传输中途崩溃 | 每次删文件都确认了别处有副本，没有一条录音消失 |
 | Verba | 3,000 段随机录音、338,799 个词的分段拼接 | 100% 完整还原，**0 个词丢失** |
 | Verba | 数据库 upsert 的三种到达顺序 | 6 种排列全部收敛到同一行，已有文字不会被后到的写入抹成空 |
+| Proxima | Entur（挪威国家级行程规划器）对同一批奥斯陆站点的 89 组答案 | 1,191 个发车时刻**零分歧** |
+| Volumen | 234 本真实 LibriVox 有声书（5,288 个文件、1,254 小时） | 19,140 个位置往返一致；103 本书与自己声明的总时长不符 |
+| Volumen | mutagen（第三方 ID3 解析器）双向对拆 | 本地写的字节 mutagen 读得出，反之亦然 |
 
 Verba 那三条是这次新加的，思路和前三个一样：录音机唯一不可原谅的 bug 是丢录音，所以队列写成纯状态机，然后拿随机事件流猛砸，**每一个事件之后**都检查"只存在于手表上的音频有没有被删"。分段拼接同理——固定切分会吃掉跨越切口的那个词，转出来的文字读着通顺、每分钟少一个词，是最难发现的一种错。
 
@@ -140,6 +147,8 @@ apps/Kairos/     TOTP 验证器     Sources/KairosCore + WatchApp + PhoneApp + C
 apps/Tactus/     节拍器           Sources/TactusCore + WatchApp + Complication
 apps/Awqat/      礼拜时间         Sources/AwqatCore + WatchApp + Complication + Shared
 apps/Verba/      录音转文字       Sources/VerbaCore + WatchApp + PhoneApp + supabase/
+apps/Proxima/    离线发车牌       Sources/ProximaCore + WatchApp + PhoneApp
+apps/Volumen/    本地有声书       Sources/VolumenCore + WatchApp + PhoneApp
 ```
 
 每个应用内部结构一致：`Sources/<Name>Core/` 是不依赖任何 Apple 框架的纯逻辑（因此 `swift test` 在哪都能跑），`Tests/` 覆盖它，`validation/` 是可执行的外部对照，其余是平台层。

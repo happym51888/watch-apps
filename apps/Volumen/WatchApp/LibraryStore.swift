@@ -141,17 +141,31 @@ final class LibraryStore: NSObject {
     }
 
     private func track(for url: URL) async -> Track? {
+        guard let probed = await Self.probe(url) else { return nil }
+        guard let id = identity(of: url) else { return nil }
+        let title = probed.title ?? url.deletingPathExtension().lastPathComponent
+        return try? Track(id: id, title: title, durationMS: probed.durationMS)
+    }
+
+    /// Read what the file itself says, off the main actor.
+    ///
+    /// `[AVMetadataItem]` is not Sendable, so it cannot come back here from the
+    /// loader — hence the whole read, title included, happens in one nonisolated
+    /// place and only the two Sendable values it produces make the trip. The
+    /// duration is deliberately taken from the file rather than from the phone's
+    /// manifest: 103 of the 234 reference books disagree with their own declared
+    /// total, and the listener's position has to be measured against the audio
+    /// that actually exists.
+    private nonisolated static func probe(_ url: URL) async -> (durationMS: Int64, title: String?)? {
         let asset = AVURLAsset(url: url)
         guard let duration = try? await asset.load(.duration) else { return nil }
         let ms = Int64((duration.seconds * 1000).rounded())
         guard ms > 0 else { return nil }
 
-        guard let id = identity(of: url) else { return nil }
         let title = (try? await asset.load(.metadata))?
             .first { $0.commonKey == .commonKeyTitle }
-            .flatMap { $0.stringValue } ?? url.deletingPathExtension().lastPathComponent
-
-        return try? Track(id: id, title: title, durationMS: ms)
+            .flatMap { $0.stringValue }
+        return (ms, title)
     }
 
     /// A stable id for a file: a hash of its head plus its exact length.
