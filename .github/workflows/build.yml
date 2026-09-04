@@ -41,11 +41,17 @@ jobs:
         with:
           python-version: "3.12"
 
-      # The validators are stdlib-only on purpose. The repo checks below read
-      # project.yml, so they need a YAML parser; install it once, up front,
-      # rather than in whichever step happens to run first.
+      # The validators are stdlib-only on purpose, with one deliberate
+      # exception: Volumen's ID3 reader is checked against mutagen, and the
+      # whole value of that check is that mutagen is somebody else's code. It
+      # refuses to pass when mutagen is missing rather than skipping quietly,
+      # so it has to be installed here.
+      #
+      # The repo checks below read project.yml, so they need a YAML parser;
+      # install both once, up front, rather than in whichever step happens to
+      # run first.
       - name: Install check dependencies
-        run: pip install --quiet pyyaml
+        run: pip install --quiet pyyaml mutagen
 
       - name: Prayer astronomy vs published timetables
         run: python apps/Awqat/validation/verify_astronomy.py
@@ -64,6 +70,27 @@ jobs:
 
       - name: Memo upsert never blanks a populated field
         run: python apps/Verba/validation/verify_upsert.py
+
+      # Proxima and Volumen. Both validators are stdlib-only and read committed
+      # fixtures, so neither touches the network: the Oslo departure instants
+      # and the LibriVox structures were fetched once, checked in, and are
+      # replayed here.
+      - name: Departure board vs Entur's journey planner
+        run: python apps/Proxima/validation/verify_gtfs.py
+
+      # A passing XCTest only proves Swift agrees with whatever the assertion
+      # says, and two of these assertions were wrong when first written. This
+      # rebuilds the same hand-made feeds and re-derives every expected value
+      # with the engine the Entur replay above validated, so a Swift test can
+      # only be green for the right reason.
+      - name: Swift departure-board expectations vs the validated engine
+        run: python apps/Proxima/validation/verify_swift_vectors.py
+
+      - name: Audiobook positions vs 234 real LibriVox books
+        run: python apps/Volumen/validation/verify_book.py
+
+      - name: ID3 chapter frames vs mutagen
+        run: python apps/Volumen/validation/verify_id3.py
 
       - name: Privacy manifests match what the code calls
         run: python tools/check_privacy_manifests.py
@@ -155,7 +182,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [Tactus, Awqat, Kairos, Verba]
+        app: [Tactus, Awqat, Kairos, Verba, Proxima, Volumen]
     steps:
       - uses: actions/checkout@v4
 
@@ -220,6 +247,19 @@ jobs:
             destination: generic/platform=iOS
           - app: Verba
             scheme: Verba
+            destination: generic/platform=iOS
+          - app: Proxima
+            scheme: ProximaWatch
+          - app: Volumen
+            scheme: VolumenWatch
+          # Both of these carry real code on the phone side — Proxima's zip
+          # reader and slice compiler, Volumen's file import — so the iOS
+          # schemes matter here as much as the watch ones.
+          - app: Proxima
+            scheme: Proxima
+            destination: generic/platform=iOS
+          - app: Volumen
+            scheme: Volumen
             destination: generic/platform=iOS
     steps:
       - uses: actions/checkout@v4
@@ -304,6 +344,10 @@ jobs:
             scheme: AwqatWatch
           - app: Verba
             scheme: VerbaWatch
+          - app: Proxima
+            scheme: ProximaWatch
+          - app: Volumen
+            scheme: VolumenWatch
     steps:
       - uses: actions/checkout@v4
 

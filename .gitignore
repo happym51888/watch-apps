@@ -26,6 +26,9 @@ Thumbs.db
 # Python
 __pycache__/
 *.pyc
+# Only needed to run Volumen's ID3 validator against mutagen locally; CI
+# installs it into the runner instead.
+.venv/
 
 # Portable PostgreSQL used to run apps/Verba/supabase/test against a real
 # server on a machine with no Docker and no admin rights. 323 MB of binaries

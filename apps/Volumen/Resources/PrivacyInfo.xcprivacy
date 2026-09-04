@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	Privacy manifest. Required at submission since spring 2024.
+
+	Volumen collects nothing. There is no account, no server, no analytics and
+	no network code of any kind: books move from the user's own Files app to
+	the phone and from the phone to the watch over WatchConnectivity, which is
+	a local link between two devices the same person owns. Bookmarks live in a
+	JSON file inside the app's own container.
+
+	NSPrivacyCollectedDataTypes is therefore an empty array rather than absent.
+	Absent and empty mean the same thing to App Store Connect, but an empty
+	array is a statement and a missing key is an oversight, and a reviewer
+	cannot tell the difference between the second one and forgetting.
+
+	NSPrivacyAccessedAPICategoryFileTimestamp is declared because
+	FileManager.attributesOfItem(atPath:) reads each audio file's size when
+	deriving its stable id (LibraryStore.identity and Player.fileMatches).
+	3B52.1 is the correct reason: those files are inside the app's own
+	container, and the value never leaves the device.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>3B52.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

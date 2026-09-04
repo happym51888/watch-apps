@@ -1,6 +1,6 @@
-# 四款 Apple Watch 应用
+# 六款 Apple Watch 应用
 
-调研 → 筛选 → 实现。四个应用都是完整源码，可直接在 Mac 或 CI 上构建。
+调研 → 筛选 → 实现。六个应用都是完整源码，可直接在 Mac 或 CI 上构建。前四个已经在 CI 上编译、装进模拟器、跑起来过；后两个（Proxima、Volumen）刚写完，逻辑层验过，**编译器还没看过**，下面会分开讲。
 
 - **调研报告与选型理由**：[`00-研究报告与选型.md`](00-研究报告与选型.md)
 - **平台限制备忘**：[`01-watchos-platform-constraints.md`](01-watchos-platform-constraints.md)
@@ -8,7 +8,7 @@
 
 ---
 
-## 四个应用
+## 六个应用
 
 | | 应用 | 做什么 | 需求证据 | 形态 |
 |---|---|---|---|---|
@@ -16,6 +16,8 @@
 | 2 | [**Tactus**](apps/Tactus/README.md) | 触觉节拍器 | Soundbrenner 卖 70–130 美元硬件做同一件事 | 仅 Watch |
 | 3 | [**Awqat**](apps/Awqat/README.md) | 礼拜时间 + 朝向 + 计数器 | 现有最佳应用的复杂功能变成空白方块 | 仅 Watch |
 | 4 | [**Verba**](apps/Verba/README.md) | 一键录音 → 转文字 → 进自己的数据库 | 你自己提的需求 | iPhone + Watch |
+| 5 | [**Proxima**](apps/Proxima/README.md) | 离线发车牌：下一班几分钟后走 | 官方 App 在地铁里转圈，而时刻表本来就不需要联网 | iPhone + Watch |
+| 6 | [**Volumen**](apps/Volumen/README.md) | 手表本地有声书，带章节 | 跑步不想带手机；现有方案要么丢进度要么没章节 | iPhone + Watch |
 
 每个应用的 README 里写了：为什么做、关键设计决策、构建步骤、审核风险、以及 v1 故意没做的东西。
 

@@ -1,5 +1,5 @@
 """
-Generate the app icons for all four apps.
+Generate the app icons for all six apps.
 
 Constraints this is written around, rather than "draw something nice":
 
@@ -19,6 +19,8 @@ Each app's glyph is the one thing the app does, not a mascot:
   Tactus  a pendulum — the metronome
   Awqat   a crescent over the horizon — prayer times by the sun and moon
   Verba   a waveform — recorded speech
+  Proxima an arrow leaving a platform — the next departure
+  Volumen headphones — a book being listened to, not read
 
 Run:  python tools/make_icons.py
 """
@@ -254,11 +256,108 @@ def verba(accent: Colour) -> Image.Image:
     return flatten(base, layer)
 
 
+# ---------------------------------------------------------------------------
+# Proxima — an arrow leaving a platform
+# ---------------------------------------------------------------------------
+
+
+def proxima(accent: Colour) -> Image.Image:
+    base = backdrop(accent)
+    layer, draw = canvas()
+
+    # The platform: a fixed vertical bar on the left. Everything else moves
+    # away from it, which is the whole idea of a departure.
+    bar_w = int(84 * SS)
+    bar_h = int(560 * SS)
+    bar_x = C - int(330 * SS)
+    draw.rounded_rectangle(
+        [bar_x, C - bar_h // 2, bar_x + bar_w, C + bar_h // 2],
+        radius=bar_w // 2,
+        fill=(255, 255, 255, 255),
+    )
+
+    # Two motion dashes, shortening toward the platform, so the direction reads
+    # without an animation.
+    dash_h = int(58 * SS)
+    for index, (length, tone) in enumerate(((int(150 * SS), 0.85), (int(96 * SS), 0.45))):
+        y = C - int(150 * SS) + index * int(300 * SS)
+        x = bar_x + bar_w + int(70 * SS)
+        draw.rounded_rectangle(
+            [x, y - dash_h // 2, x + length, y + dash_h // 2],
+            radius=dash_h // 2,
+            fill=blend((255, 255, 255), (16, 18, 22), 1 - tone) + (255,),
+        )
+
+    # The arrow. A single bold chevron plus shaft; at 40 px anything more
+    # detailed than this is a smudge.
+    shaft_h = int(96 * SS)
+    shaft_x0 = bar_x + bar_w + int(70 * SS)
+    shaft_x1 = C + int(190 * SS)
+    draw.rounded_rectangle(
+        [shaft_x0, C - shaft_h // 2, shaft_x1, C + shaft_h // 2],
+        radius=shaft_h // 2,
+        fill=accent + (255,),
+    )
+    head = int(196 * SS)
+    tip_x = C + int(350 * SS)
+    draw.polygon(
+        [
+            (tip_x, C),
+            (tip_x - head, C - head),
+            (tip_x - head, C + head),
+        ],
+        fill=accent + (255,),
+    )
+
+    return flatten(base, layer)
+
+
+# ---------------------------------------------------------------------------
+# Volumen — headphones
+# ---------------------------------------------------------------------------
+
+
+def volumen(accent: Colour) -> Image.Image:
+    base = backdrop(accent)
+    layer, draw = canvas()
+
+    # The headband, drawn as a thick half-arc. Sitting slightly above centre
+    # leaves room for the cups without the whole thing drifting off the
+    # circular mask.
+    cy = C + int(40 * SS)
+    radius = int(300 * SS)
+    band = int(78 * SS)
+    draw.arc(
+        [C - radius, cy - radius, C + radius, cy + radius],
+        start=180,
+        end=360,
+        fill=(255, 255, 255, 255),
+        width=band,
+    )
+
+    # The cups. Rounded rectangles rather than circles: circles read as a pair
+    # of eyes at small sizes, rectangles read as headphones.
+    cup_w = int(150 * SS)
+    cup_h = int(300 * SS)
+    top = cy - int(30 * SS)
+    for side in (-1, 1):
+        x = C + side * radius - cup_w // 2
+        draw.rounded_rectangle(
+            [x, top, x + cup_w, top + cup_h],
+            radius=cup_w // 2,
+            fill=accent + (255,),
+        )
+
+    return flatten(base, layer)
+
+
 APPS = {
     "Kairos": ((62, 180, 236), kairos),
     "Tactus": ((252, 133, 76), tactus),
     "Awqat": ((102, 202, 139), awqat),
     "Verba": ((229, 59, 62), verba),
+    "Proxima": ((250, 204, 21), proxima),
+    "Volumen": ((167, 139, 250), volumen),
 }
 
 

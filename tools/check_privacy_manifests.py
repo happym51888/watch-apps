@@ -22,7 +22,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-APPS = ["Kairos", "Tactus", "Awqat", "Verba"]
+APPS = ["Kairos", "Tactus", "Awqat", "Verba", "Proxima", "Volumen"]
 
 # Required-reason API categories, mapped to the source patterns that trigger
 # them. Only the categories these apps could plausibly touch.

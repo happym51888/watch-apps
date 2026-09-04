@@ -1,0 +1,80 @@
+name: Proxima
+
+options:
+  bundleIdPrefix: app.proxima
+  deploymentTarget:
+    watchOS: "11.0"
+    iOS: "18.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # Set your Team ID here, or pick a team in Xcode's Signing pane.
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+# Note there is no `packages:` block. Sources/ProximaCore is compiled straight
+# into each target instead of being consumed as a local SwiftPM package, which
+# is why the app-layer files do not `import ProximaCore` — inside the Xcode
+# build it is all one module. Package.swift still builds the core as a real
+# module and is what `swift test` uses, so the tests are unaffected either way.
+
+targets:
+
+  # The phone does the downloading, the unzipping and the compiling; the watch
+  # does arithmetic. That split is the product: once a slice is on the watch it
+  # answers with no phone, no signal and no data plan, which is the situation a
+  # rider is actually in when they need it.
+  Proxima:
+    type: application
+    platform: iOS
+    sources:
+      - path: PhoneApp
+      - path: Sources/ProximaCore
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.proxima
+        INFOPLIST_FILE: PhoneApp/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        TARGETED_DEVICE_FAMILY: "1"
+    dependencies:
+      - target: ProximaWatch
+        embed: true
+
+  ProximaWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: WatchApp
+      - path: Sources/ProximaCore
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.proxima.watchkitapp
+        INFOPLIST_FILE: WatchApp/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+# No unit-test target on purpose. `Tests/ProximaCoreTests` uses
+# `@testable import ProximaCore`, which needs ProximaCore to be a real module —
+# it is, under Package.swift, and `swift test` runs it there. An Xcode test
+# target that compiled the core sources in directly would break that import for
+# no benefit, since the same tests already run in CI.
+
+schemes:
+  Proxima:
+    build:
+      targets:
+        Proxima: all
+        ProximaWatch: all
+  ProximaWatch:
+    build:
+      targets:
+        ProximaWatch: all

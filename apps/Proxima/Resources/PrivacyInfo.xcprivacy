@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	Privacy manifest. Required at submission since spring 2024.
+
+	Proxima collects nothing. The phone downloads a timetable file from a URL
+	the user types in — a public open-data feed published by a transit agency —
+	compiles the stops the user picked, and sends the result to the watch over
+	WatchConnectivity. The watch never touches the network at all.
+
+	Worth being explicit about, because a departure board is exactly the kind
+	of app people expect to be tracking them: there is no Core Location code,
+	no nearby-stops feature, no analytics, and no server belonging to this app.
+	The agency's web server sees an ordinary HTTP request for a file it
+	publishes to everyone, and that is the only outbound traffic.
+
+	NSPrivacyCollectedDataTypes is therefore an empty array rather than absent.
+	Both mean the same thing to App Store Connect, but an empty array is a
+	statement and a missing key is indistinguishable from an oversight.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>
