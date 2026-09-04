@@ -242,15 +242,24 @@ public struct Book: Sendable, Equatable, Identifiable {
     }
 }
 
-/// Which chapter covers this instant.
-///
-/// W1 again on a second axis: a position exactly on a chapter's start is in
-/// that chapter. Positions outside the book clamp to the first or last.
-public func chapterIndex(in chapters: [Chapter], at absoluteMS: Int64) -> Int {
-    precondition(!chapters.isEmpty, "no chapters")
-    if absoluteMS <= chapters[0].startMS { return 0 }
-    if absoluteMS >= chapters[chapters.count - 1].endMS { return chapters.count - 1 }
-    return upperBound(chapters.map(\.startMS), absoluteMS) - 1
+extension Chapter {
+    /// Which chapter covers this instant.
+    ///
+    /// W1 again on a second axis: a position exactly on a chapter's start is in
+    /// that chapter. Positions outside the book clamp to the first or last.
+    ///
+    /// A static method rather than a free function so that `PlaybackState` can
+    /// call it from inside its own `chapterIndex` property. A free function of
+    /// the same name needs a `VolumenCore.` prefix there to disambiguate, and
+    /// that prefix only exists when this file is a module — which it is under
+    /// `swift test` and is not when the sources compile straight into the watch
+    /// target. The tests would have kept passing and the app would not build.
+    public static func index(in chapters: [Chapter], at absoluteMS: Int64) -> Int {
+        precondition(!chapters.isEmpty, "no chapters")
+        if absoluteMS <= chapters[0].startMS { return 0 }
+        if absoluteMS >= chapters[chapters.count - 1].endMS { return chapters.count - 1 }
+        return upperBound(chapters.map(\.startMS), absoluteMS) - 1
+    }
 }
 
 /// First index whose value is strictly greater than `value`.

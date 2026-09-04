@@ -257,10 +257,10 @@ final class BookTests: XCTestCase {
         XCTAssertEqual(chapters[1].endMS, 30_000)
         // Positions inside the span report the same chapter regardless of
         // which file they are physically in.
-        XCTAssertEqual(chapterIndex(in: chapters, at: 6_000), 1)
-        XCTAssertEqual(chapterIndex(in: chapters, at: 25_000), 1)
+        XCTAssertEqual(Chapter.index(in: chapters, at: 6_000), 1)
+        XCTAssertEqual(Chapter.index(in: chapters, at: 25_000), 1)
         // And the chapter boundary follows the same rule as the file boundary.
-        XCTAssertEqual(chapterIndex(in: chapters, at: 30_000), 2)
+        XCTAssertEqual(Chapter.index(in: chapters, at: 30_000), 2)
     }
 
     // MARK: - Refusing incoherent books

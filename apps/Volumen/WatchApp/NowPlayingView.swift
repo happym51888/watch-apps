@@ -109,15 +109,14 @@ struct NowPlayingView: View {
 
     // MARK: - Sleep timer
 
+    // watchOS has no `Menu` — a pushed screen is the platform's answer, and it
+    // is the better one here anyway: picking a sleep timer in the dark is
+    // easier against five full-width rows than a popover.
     @ViewBuilder
     private var sleepRow: some View {
         if let state = player.state {
-            Menu {
-                Button("Off") { player.setSleepTimer(.off) }
-                Button("15 minutes") { player.setSleepTimer(.after(playingMS: 15 * 60_000)) }
-                Button("30 minutes") { player.setSleepTimer(.after(playingMS: 30 * 60_000)) }
-                Button("45 minutes") { player.setSleepTimer(.after(playingMS: 45 * 60_000)) }
-                Button("End of chapter") { player.setSleepTimer(.endOfChapter) }
+            NavigationLink {
+                SleepTimerView()
             } label: {
                 Label(
                     state.sleepRemainingMS.map { "Sleep in \(format($0))" } ?? "Sleep timer",
@@ -125,33 +124,23 @@ struct NowPlayingView: View {
                 )
                 .font(.system(size: 11))
             }
-            .menuStyle(.automatic)
         }
     }
 
     // MARK: - Chapters
 
+    // `DisclosureGroup` is unavailable on watchOS too, and expanding a long
+    // chapter list inline would push the transport controls off the screen
+    // that exists to hold them.
     @ViewBuilder
     private var chapterList: some View {
         if let state = player.state, state.chapters.count > 1 {
-            DisclosureGroup("Chapters") {
-                ForEach(Array(state.chapters.enumerated()), id: \.offset) { index, chapter in
-                    Button {
-                        player.jump(toChapter: index)
-                    } label: {
-                        HStack {
-                            Text(chapter.title.isEmpty ? "Chapter \(index + 1)" : chapter.title)
-                                .lineLimit(1)
-                            Spacer()
-                            Text(format(chapter.durationMS))
-                                .foregroundStyle(.secondary)
-                        }
-                        .font(.system(size: 11))
-                    }
-                    .buttonStyle(.plain)
-                }
+            NavigationLink {
+                ChapterListView()
+            } label: {
+                Label("Chapters", systemImage: "list.bullet")
+                    .font(.system(size: 11))
             }
-            .font(.system(size: 12))
         }
     }
 
@@ -170,6 +159,61 @@ struct NowPlayingView: View {
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
         }
+    }
+}
+
+// MARK: - Pushed screens
+
+private struct SleepTimerView: View {
+    @Environment(Player.self) private var player
+    @Environment(\.dismiss) private var dismiss
+
+    private static let choices: [(String, SleepTimer)] = [
+        ("Off", .off),
+        ("15 minutes", .after(playingMS: 15 * 60_000)),
+        ("30 minutes", .after(playingMS: 30 * 60_000)),
+        ("45 minutes", .after(playingMS: 45 * 60_000)),
+        ("End of chapter", .endOfChapter),
+    ]
+
+    var body: some View {
+        List {
+            ForEach(Self.choices, id: \.0) { label, timer in
+                Button(label) {
+                    player.setSleepTimer(timer)
+                    dismiss()
+                }
+            }
+        }
+        .navigationTitle("Sleep")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct ChapterListView: View {
+    @Environment(Player.self) private var player
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        List {
+            ForEach(Array((player.state?.chapters ?? []).enumerated()), id: \.offset) { index, chapter in
+                Button {
+                    player.jump(toChapter: index)
+                    dismiss()
+                } label: {
+                    HStack {
+                        Text(chapter.title.isEmpty ? "Chapter \(index + 1)" : chapter.title)
+                            .lineLimit(1)
+                        Spacer()
+                        Text(format(chapter.durationMS))
+                            .foregroundStyle(.secondary)
+                    }
+                    .font(.system(size: 12))
+                }
+            }
+        }
+        .navigationTitle("Chapters")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

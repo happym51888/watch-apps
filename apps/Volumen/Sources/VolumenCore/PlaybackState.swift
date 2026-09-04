@@ -72,7 +72,7 @@ public struct PlaybackState: Sendable {
     public var remainingMS: Int64 { book.remainingMS(from: mark) }
 
     public var chapterIndex: Int {
-        VolumenCore.chapterIndex(in: chapters, at: absoluteMS)
+        Chapter.index(in: chapters, at: absoluteMS)
     }
 
     public var currentChapter: Chapter { chapters[chapterIndex] }
@@ -186,8 +186,8 @@ public struct PlaybackState: Sendable {
             // the chapter that follows it — so comparing against `chapterIndex`
             // would say the chapter had not ended when it just had.
             let endsChapter = boundary >= book.totalMS
-                || VolumenCore.chapterIndex(in: chapters, at: boundary)
-                    != VolumenCore.chapterIndex(in: chapters, at: boundary - 1)
+                || Chapter.index(in: chapters, at: boundary)
+                    != Chapter.index(in: chapters, at: boundary - 1)
             if endsChapter {
                 sleepTimer = .off
                 isPlaying = false
