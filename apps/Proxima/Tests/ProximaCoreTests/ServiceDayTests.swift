@@ -1,4 +1,4 @@
-﻿import Foundation
+import Foundation
 import XCTest
 @testable import ProximaCore
 
@@ -148,16 +148,28 @@ final class ServiceDayTests: XCTestCase {
     func testTheSpanBetweenConsecutiveOriginsIsTheRealLengthOfTheDay() {
         let table = timetable(zone: "America/Los_Angeles")
 
-        let short = table.serviceDayOrigin(ServiceDate(year: 2026, month: 3, day: 9))
-            .timeIntervalSince(table.serviceDayOrigin(ServiceDate(year: 2026, month: 3, day: 8)))
-        XCTAssertEqual(short, 23 * 3_600, accuracy: 0.5)
+        func span(_ from: ServiceDate, _ to: ServiceDate) -> TimeInterval {
+            table.serviceDayOrigin(to).timeIntervalSince(table.serviceDayOrigin(from))
+        }
 
-        let long = table.serviceDayOrigin(ServiceDate(year: 2026, month: 11, day: 2))
-            .timeIntervalSince(table.serviceDayOrigin(ServiceDate(year: 2026, month: 11, day: 1)))
-        XCTAssertEqual(long, 25 * 3_600, accuracy: 0.5)
+        // Which pair of days is short is not the pair you first reach for. The
+        // clocks move at 02:00 on 8 March, but both 7 and 8 March are anchored
+        // at their own local noon — and noon on the 7th is still PST while noon
+        // on the 8th is already PDT. So the missing hour shows up in the step
+        // *into* the 8th, not the step out of it.
+        XCTAssertEqual(span(.init(year: 2026, month: 3, day: 7),
+                            .init(year: 2026, month: 3, day: 8)), 23 * 3_600, accuracy: 0.5)
+        XCTAssertEqual(span(.init(year: 2026, month: 3, day: 8),
+                            .init(year: 2026, month: 3, day: 9)), 24 * 3_600, accuracy: 0.5)
 
-        let ordinary = table.serviceDayOrigin(ServiceDate(year: 2026, month: 6, day: 16))
-            .timeIntervalSince(table.serviceDayOrigin(ServiceDate(year: 2026, month: 6, day: 15)))
-        XCTAssertEqual(ordinary, 24 * 3_600, accuracy: 0.5)
+        // Same shape in the other direction: 1 November gains the hour, so the
+        // long step is the one that lands on it.
+        XCTAssertEqual(span(.init(year: 2026, month: 10, day: 31),
+                            .init(year: 2026, month: 11, day: 1)), 25 * 3_600, accuracy: 0.5)
+        XCTAssertEqual(span(.init(year: 2026, month: 11, day: 1),
+                            .init(year: 2026, month: 11, day: 2)), 24 * 3_600, accuracy: 0.5)
+
+        XCTAssertEqual(span(.init(year: 2026, month: 6, day: 15),
+                            .init(year: 2026, month: 6, day: 16)), 24 * 3_600, accuracy: 0.5)
     }
 }

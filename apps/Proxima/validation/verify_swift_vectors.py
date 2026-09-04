@@ -228,6 +228,27 @@ def main() -> int:
         "which is exactly why the wrong rule survives testing",
     )
 
+    # --- testTheSpanBetweenConsecutiveOriginsIsTheRealLengthOfTheDay ------
+    # The Swift version of this first asked for the step *out of* 8 March and
+    # got 24 hours, which reads like broken arithmetic and is not. Both days
+    # are anchored at their own local noon; noon on the 7th is PST and noon on
+    # the 8th is PDT, so the missing hour is in the step that lands on the 8th.
+    print("\ntestTheSpanBetweenConsecutiveOriginsIsTheRealLengthOfTheDay")
+
+    def span(a, b) -> float:
+        origin = everyday.service_day_origin
+        return (origin(dt.date(*b)) - origin(dt.date(*a))).total_seconds()
+
+    for first, second, hours, why in [
+        ((2026, 3, 7), (2026, 3, 8), 23, "the step onto the spring-forward day is short"),
+        ((2026, 3, 8), (2026, 3, 9), 24, "the step off it is ordinary"),
+        ((2026, 10, 31), (2026, 11, 1), 25, "the step onto the fall-back day is long"),
+        ((2026, 11, 1), (2026, 11, 2), 24, "the step off it is ordinary"),
+        ((2026, 6, 15), (2026, 6, 16), 24, "and midsummer is 24 hours"),
+    ]:
+        got_span = span(first, second)
+        check(got_span == hours * 3600, why, f"{got_span / 3600:g}h")
+
     # --- testAnExceptionCancels / testAnExceptionAdds ----------------------
     print("\ntestAnExceptionCancelsAServiceTheCalendarSaysIsRunning")
     cancelled = feed(SIMPLE, calendar_dates="service_id,date,exception_type\nweekday,20260703,2\n")

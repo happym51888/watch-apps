@@ -16,8 +16,15 @@
 | 2 | [**Tactus**](apps/Tactus/README.md) | 触觉节拍器 | Soundbrenner 卖 70–130 美元硬件做同一件事 | 仅 Watch |
 | 3 | [**Awqat**](apps/Awqat/README.md) | 礼拜时间 + 朝向 + 计数器 | 现有最佳应用的复杂功能变成空白方块 | 仅 Watch |
 | 4 | [**Verba**](apps/Verba/README.md) | 一键录音 → 转文字 → 进自己的数据库 | 你自己提的需求 | iPhone + Watch |
-| 5 | [**Proxima**](apps/Proxima/README.md) | 离线发车牌：下一班几分钟后走 | 官方 App 在地铁里转圈，而时刻表本来就不需要联网 | iPhone + Watch |
-| 6 | [**Volumen**](apps/Volumen/README.md) | 手表本地有声书，带章节 | 跑步不想带手机；现有方案要么丢进度要么没章节 | iPhone + Watch |
+| 5 | [**Proxima**](apps/Proxima/README.md) | 离线发车牌：下一班几分钟后走 | 平台论证（下方说明），非用户语料 | iPhone + Watch |
+| 6 | [**Volumen**](apps/Volumen/README.md) | 手表本地有声书，带章节 | 调研否掉的"离线 Audible"绕开 DRM 墙后剩下的那部分 | iPhone + Watch |
+
+**这两个的需求证据比前四个弱，得说清楚。** 前四个每个都能摆出可点开的用户原话（GitHub 的 👍 数、评论区的差评、开发者论坛的表态）。这两个不行：
+
+- **Volumen** 有出处，但是反向的。调研报告 §2.3 把"离线 Spotify / Audible / Libby"整条否掉了，理由是"DRM 墙，不是代码问题"。这个判断没错，可它顺手把 DRM **管不着**的那部分也一起扔了——公版有声书（LibriVox）、无 DRM 的购买文件、自己录的东西。Volumen 只做这部分，所以它不是推翻那条结论，是从那条结论下面捡回来的。
+- **Proxima** 我没有用户语料，就不假装有。理由是平台层面的：时刻表是静态数据，"下一班几点"这个问题在算术上不需要联网，而手腕上的网络恰恰是整台设备最不可靠的东西。这是个可核对的论证，不是一条需求证据，两者不该混着说。
+
+真正让这两个入选的，是第三条标准：**它们最容易算错的那部分，都能拿外部权威对答案**——Proxima 对 Entur 行程规划器，Volumen 对 mutagen 和 234 本真实 LibriVox 有声书。在没有 Mac 的前提下，这一条的权重比在正常情况下高得多。
 
 每个应用的 README 里写了：为什么做、关键设计决策、构建步骤、审核风险、以及 v1 故意没做的东西。
 

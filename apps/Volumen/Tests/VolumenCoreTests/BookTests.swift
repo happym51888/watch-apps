@@ -1,4 +1,4 @@
-﻿import Foundation
+import Foundation
 import XCTest
 @testable import VolumenCore
 
@@ -179,13 +179,23 @@ final class BookTests: XCTestCase {
             XCTAssertEqual(book.absolute(book.locate(start)), start)
         }
 
-        // Why this is not a Float: at 198 million the spacing between
-        // representable Float values is 16, so the same arithmetic in Float
-        // cannot name the second it is in. Asserted rather than asserted-about,
-        // so a future "just use TimeInterval" change has to argue with a test.
+        // Why this is not a Float. Past 2^24 ms — 4h39m, which 72 of the 234
+        // reference books exceed — consecutive Float values are more than a
+        // millisecond apart; up here in the 198 millions they are 16 apart.
+        //
+        // The trap is that file boundaries do not show it. Every boundary in
+        // this book is a multiple of 990,000, which is a multiple of 16, so
+        // Float carries them perfectly. Test only boundaries and Float looks
+        // fine, which is how this reaches a listener.
         let boundary = book.start(of: 199)
-        XCTAssertNotEqual(Int64(Float(boundary)), boundary)
-        XCTAssertEqual(Int64(Double(boundary)), boundary)
+        XCTAssertEqual(boundary % 16, 0)
+        XCTAssertEqual(Int64(Float(boundary)), boundary, "boundaries survive, by luck")
+
+        // A listener pauses in the middle of a sentence, not on a boundary.
+        let paused = boundary + 7_531
+        XCTAssertNotEqual(Int64(Float(paused)), paused)
+        XCTAssertEqual(abs(Int64(Float(paused)) - paused), 5, "resumes 5 ms off")
+        XCTAssertEqual(Int64(Double(paused)), paused)
     }
 
     // MARK: - W7, chapters are not files

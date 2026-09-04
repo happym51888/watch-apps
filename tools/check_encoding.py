@@ -49,9 +49,17 @@ BOMS = {
 
 
 def tracked_files() -> list[pathlib.Path]:
-    """Only files git will actually carry to CI. Respects .gitignore for free."""
+    """Every file git will carry to CI, including ones not committed yet.
+
+    `--others --exclude-standard` is the part that matters. Listing only
+    tracked files means a brand new file is invisible to this check until the
+    commit that adds it, so the first CI run after any new work is the one that
+    finds the problem — which is exactly what happened when seven new Swift
+    files went up with a BOM. `.gitignore` is still respected, so this does not
+    start reading build output or `.venv`.
+    """
     listing = subprocess.run(
-        ["git", "ls-files", "-z"],
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
         cwd=ROOT, capture_output=True, check=True,
     ).stdout.decode("utf-8", "surrogateescape")
     return [ROOT / name for name in listing.split("\0") if name]

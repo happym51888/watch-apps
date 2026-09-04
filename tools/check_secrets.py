@@ -75,8 +75,12 @@ SKIP_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".pdf", ".zip", ".ico"}
 
 
 def tracked_files() -> list[pathlib.Path]:
+    # Uncommitted files count too, and for this check more than most: a key
+    # pasted into a new file is at its most dangerous in the moment before it
+    # is committed, which is the one moment `git ls-files` alone cannot see.
     listing = subprocess.run(
-        ["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, check=True,
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+        cwd=ROOT, capture_output=True, check=True,
     ).stdout.decode("utf-8", "surrogateescape")
     return [ROOT / name for name in listing.split("\0") if name]
 
